@@ -14,6 +14,7 @@ export interface IPboHeaderEntry {
     timestamp: number;
     dataSize: number;
     getSize(): number;
+    contents: Buffer;
 }
 
 export class PboHeaderEntry implements IPboHeaderEntry {
@@ -27,6 +28,7 @@ export class PboHeaderEntry implements IPboHeaderEntry {
     }
 
     public reserved: number;
+    public contents: Buffer;
 
     constructor(
         public name: string,

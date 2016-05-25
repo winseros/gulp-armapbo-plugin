@@ -40,7 +40,7 @@ export class PboBuilder {
 		offset = this.writeHeaderEntries(writer, headerEntries, result, offset);
 		offset = writer.writeHeaderEntry(result, boundaryEntry, offset);
 
-		offset = this.writeContents(contents, result, offset);
+		offset = this.writeContents(headerEntries, result, offset);
 
 		const dataChunk = result.slice(0, offset);
 		const checkSum = new Sha1(dataChunk).get();
@@ -54,10 +54,14 @@ export class PboBuilder {
 
 	private getHeaderEntries(contents:File[]):EntriesCollection<IPboHeaderEntry> {
 		let size = 0;
-		let entries = <EntriesCollection<IPboHeaderEntry>>contents.map(file => {
+		let entries = <EntriesCollection<IPboHeaderEntry>>contents.filter(file => {
+			return file.contents ? true : false;//filter out directories
+		}).map(file => {
 			const fileSize = file.stat.size;
 			const timeStamp = file.stat.mtime.getTime() / 1000;
+
 			const entry = new PboHeaderEntry(file.relative, PackingMethod.uncompressed, fileSize, timeStamp, fileSize);
+			entry.contents = <Buffer>file.contents;
 
 			size += entry.getSize() + fileSize;
 
@@ -93,10 +97,9 @@ export class PboBuilder {
 		return offset;
 	}
 
-	private writeContents(contents:File[], buffer:Buffer, offset:number):number {
-		contents.forEach(content => {
-			const fileData = <Buffer>content.contents;
-			offset += fileData.copy(buffer, offset, 0);
+	private writeContents(entries:IPboHeaderEntry[], buffer:Buffer, offset:number):number {
+		entries.forEach(entry => {
+			offset += entry.contents.copy(buffer, offset, 0);
 		});
 
 		return offset;

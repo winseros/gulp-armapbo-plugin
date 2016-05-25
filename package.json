@@ -1,13 +1,16 @@
 {
-  "name": "gulp-armapbo-plugin",
+  "name": "gulp-armapbo",
   "version": "0.1.0",
   "description": "The plugin for Gulp which allows to pack ArmA pbo files from sources.",
-  "main": "index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "test"
+    "test": "gulp test",
+    "assemble": "gulp assemble"
   },
   "keywords": [
     "arma",
+    "arma2",
+    "arma3",
     "pbo",
     "gulp"
   ],
@@ -17,6 +20,7 @@
     "chai": "^3.5.0",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
+    "gulp-mocha": "^2.2.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-typescript": "^2.13.4",
     "mocha": "^2.5.1",
@@ -26,5 +30,10 @@
   },
   "dependencies": {
     "vinyl": "^1.1.1"
-  }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.js.map",
+    "!**/test/"
+  ]
 }

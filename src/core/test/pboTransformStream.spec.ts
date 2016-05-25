@@ -107,7 +107,8 @@ describe('core/pboTransformStream', function () {
 				callback();
 			};
 
-			emitter.pipe(new PboTransformStream('a-pbo-file-name.pbo', [ext1, ext2])).pipe(receiver);
+			const options = {headerExtensions: [ext1, ext2]};
+			emitter.pipe(new PboTransformStream('a-pbo-file-name.pbo', options)).pipe(receiver);
 		});
 	});
 });
