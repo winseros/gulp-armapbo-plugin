@@ -2,14 +2,12 @@
 
 The plugin's goal is to create Arma2/Arma3 pbo files from sources using [Gulp](http://gulpjs.com).
 
-## The general usage
-
-1. Install the plugin
+## Installation
 ```
-npm install gulp-armapbo-plugin
+npm install gulp-armapbo
 ```
 
-2. Add the plugin to the gulpfile
+## Usage
 ```
 var gulp = require('gulp');
 var pbo = require('gulp-armapbo');

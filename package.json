@@ -16,6 +16,7 @@
   ],
   "author": "winse",
   "license": "MIT",
+  "repository": "https://github.com/winseros/gulp-armapbo-plugin",
   "devDependencies": {
     "chai": "^3.5.0",
     "del": "^2.2.0",
