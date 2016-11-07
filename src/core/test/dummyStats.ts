@@ -1,53 +1,52 @@
-import * as fs from 'fs';
+import {Stats} from 'fs';
 
-export class DummyStats implements fs.Stats{
+export class DummyStats implements Stats {
 
-	constructor(size:number, mtime:Date)
-	{
+	constructor(size: number, mtime: Date) {
 		this.size = size;
 		this.mtime = mtime;
 	}
 
-	isFile():boolean {
-		return null;
+	isFile(): boolean {
+		return false;
 	}
 
-	isDirectory():boolean {
-		return null;
+	isDirectory(): boolean {
+		return false;
 	}
 
-	isBlockDevice():boolean {
-		return null;
+	isBlockDevice(): boolean {
+		return false;
 	}
 
-	isCharacterDevice():boolean {
-		return null;
+	isCharacterDevice(): boolean {
+		return false;
 	}
 
-	isSymbolicLink():boolean {
-		return null;
+	isSymbolicLink(): boolean {
+		return false;
 	}
 
-	isFIFO():boolean {
-		return null;
+	isFIFO(): boolean {
+		return false;
 	}
 
-	isSocket():boolean {
-		return null;
+	isSocket(): boolean {
+		return false;
 	}
 
-	dev:number;
-	ino:number;
-	mode:number;
-	nlink:number;
-	uid:number;
-	gid:number;
-	rdev:number;
-	size:number;
-	blksize:number;
-	blocks:number;
-	atime:Date;
-	mtime:Date;
-	ctime:Date;
-	birthtime:Date;
+	dev: number;
+	ino: number;
+	mode: number;
+	nlink: number;
+	uid: number;
+	gid: number;
+	rdev: number;
+	size: number;
+	blksize: number;
+	blocks: number;
+	atime: Date;
+	mtime: Date;
+	ctime: Date;
+	birthtime: Date;
 }

@@ -4,27 +4,27 @@ import {expect} from 'chai';
 describe('domain/pboHeaderEntry', function () {
 	describe('ctor', function () {
 		it('should throw if called with illegal args', function () {
-			expect(function () {
-				new PboHeaderEntry(null, null, null, null, null);
+			expect(() => {
+				return new PboHeaderEntry(null, null, null, null, null);
 			}).to.throw(/name/);
 
-			expect(function () {
-				new PboHeaderEntry('', null, null, null, null);
+			expect(() => {
+				return new PboHeaderEntry('', null, null, null, null);
 			}).to.throw(/packingMethod/);
 
-			expect(function () {
-				new PboHeaderEntry('', PackingMethod.uncompressed, null, null, null);
+			expect(() => {
+				return new PboHeaderEntry('', PackingMethod.uncompressed, null, null, null);
 			}).to.throw(/originalSize/);
 
-			expect(function () {
-				new PboHeaderEntry('', PackingMethod.uncompressed, 1, null, null);
+			expect(() => {
+				return new PboHeaderEntry('', PackingMethod.uncompressed, 1, null, null);
 			}).to.throw(/timestamp/);
 
-			expect(function () {
-				new PboHeaderEntry('', PackingMethod.uncompressed, 1, 1, null);
+			expect(() => {
+				return new PboHeaderEntry('', PackingMethod.uncompressed, 1, 1, null);
 			}).to.throw(/dataSize/);
 		});
-		
+
 		it('should initialize object', function () {
 			let entry = new PboHeaderEntry('entryName', PackingMethod.product, 10, 30, 40);
 

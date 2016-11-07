@@ -1,18 +1,18 @@
-import * as stream from 'stream';
+import {Transform} from 'stream';
 import {Assert} from '../util/assert';
 import {IPboHeaderExtension} from '../domain/pboHeaderExtension';
 import {PboBuilder} from './pboBuilder';
-import File = require('vinyl');
+import * as File from 'vinyl';
 
 interface VinylTransformCallback {
-	(err?:any, result?:File):void
+	(err?:any, result?:File):void;
 }
 
-export interface IPboStreamOptions{
-	headerExtensions: IPboHeaderExtension[]
+export interface IPboStreamOptions {
+	headerExtensions: IPboHeaderExtension[];
 }
 
-export class PboTransformStream extends stream.Transform {
+export class PboTransformStream extends Transform {
 	private contentParts:File[] = [];
 	private options:IPboStreamOptions;
 
@@ -21,7 +21,7 @@ export class PboTransformStream extends stream.Transform {
 		super({objectMode: true});
 		Assert.isString(pboFileName, 'pboFileName');
 
-		this.options = options || <IPboStreamOptions>{};
+		this.options = options || {} as IPboStreamOptions;
 	}
 
 	_transform(file:File, encoding:string, callback:VinylTransformCallback):void {

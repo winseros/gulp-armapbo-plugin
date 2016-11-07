@@ -1,41 +1,61 @@
 import {PboTransformStream} from '../pboTransformStream';
 import {PboBuilder} from '../pboBuilder';
-import * as stream from 'stream';
+import {Readable, Writable, Duplex} from 'stream';
 import {expect} from 'chai';
 import * as sinon from 'sinon';
 import {DummyStats} from './dummyStats';
-import File = require('vinyl');
+import * as File from 'vinyl';
 
-describe('core/pboTransformStream', function () {
+class MockReadable extends Readable {
+	constructor() {
+		super({ objectMode: true });
+	}
 
-	let sandbox:sinon.SinonSandbox;
+	mockRead(impl: (size?: number) => void): void {
+		this._read = impl;
+	}
+}
 
-	beforeEach(function () {
+class MockWritable extends Writable {
+	constructor() {
+		super({ objectMode: true });
+	}
+
+	mockWrite(impl: (data: File, encoding: string, callback: Function) => void): void {
+		this._write = impl;
+	}
+}
+
+describe('core/pboTransformStream', function() {
+	let sandbox: sinon.SinonSandbox;
+
+	beforeEach(function() {
 		sandbox = sinon.sandbox.create();
 	});
 
-	afterEach(function () {
+	afterEach(function() {
 		sandbox.restore();
 	});
 
-	describe('_transform', function () {
-		it('should throw if input is streamed', function (done) {
-			let transform = new PboTransformStream('file.pbo').on('error', (err:Error)=> {
+	describe('_transform', function() {
+		it('should throw if input is streamed', function(done) {
+			const transform = new PboTransformStream('file.pbo').on('error', (err: Error) => {
 				expect(err).to.be.an('Error');
 				expect(err.message).to.equal('Streaming input is not supported');
 				done();
 			});
 
-			let emitter = new stream.Readable({objectMode: true});
-			emitter._read = function () {
-				let file = new File({contents: new stream.Duplex()});
-				this.push(file);
-				this.push(null);
-			};
+			const emitter = new MockReadable();
+			emitter.mockRead(() => {
+				let file = new File({ contents: new Duplex() });
+				emitter.push(file);
+				emitter.push(null);
+			});
+
 			emitter.pipe(transform);
 		});
 
-		it('should create a pbo file', function (done) {
+		it('should create a pbo file', function(done) {
 			const contents = new Buffer('contents');
 			let stubBuild = sandbox.stub(PboBuilder.prototype, 'build').returns(contents);
 
@@ -54,20 +74,20 @@ describe('core/pboTransformStream', function () {
 			});
 
 			let i = 0;
-			let emitter = new stream.Readable({objectMode: true});
-			emitter._read = function () {
-				if (i == 0) {
-					this.push(file1);
-				} else if (i == 1) {
-					this.push(file2);
+			const emitter = new MockReadable();
+			emitter.mockRead(() => {
+				if (i === 0) {
+					emitter.push(file1);
+				} else if (i === 1) {
+					emitter.push(file2);
 				} else {
-					this.push(null);
+					emitter.push(null);
 				}
 				i++;
-			};
+			});
 
-			let receiver = new stream.Writable({objectMode: true});
-			receiver._write = function (data:File, encoding:string, callback:Function):void {
+			const reciever = new MockWritable();
+			reciever.mockWrite((data: File, encoding: string, callback: Function) => {
 				expect(data).not.to.equal(null);
 				expect(data).not.to.equal(undefined);
 
@@ -81,34 +101,34 @@ describe('core/pboTransformStream', function () {
 				done();
 
 				callback();
-			};
+			});
 
-			emitter.pipe(new PboTransformStream('a-pbo-file-name.pbo')).pipe(receiver);
+			emitter.pipe(new PboTransformStream('a-pbo-file-name.pbo')).pipe(reciever);
 		});
 
-		it('should create a pbo file with header extensions', function (done) {
+		it('should create a pbo file with header extensions', function(done) {
 			const contents = new Buffer('contents');
 			let stubBuild = sandbox.stub(PboBuilder.prototype, 'build').returns(contents);
 
-			let ext1 = {name: 'ext1n', value: 'ext1v'};
-			let ext2 = {name: 'ext2n', value: 'ext2v'};
+			let ext1 = { name: 'ext1n', value: 'ext1v' };
+			let ext2 = { name: 'ext2n', value: 'ext2v' };
 
-			let emitter = new stream.Readable({objectMode: true});
-			emitter._read = function () {
-				this.push(null);
-			};
+			const emitter = new MockReadable();
+			emitter.mockRead(() => {
+				emitter.push(null);
+			});
 
-			let receiver = new stream.Writable({objectMode: true});
-			receiver._write = function (data:File, encoding:string, callback:Function):void {
+			const reciever = new MockWritable();
+			reciever.mockWrite((data: File, encoding: string, callback: Function) => {
 				expect(stubBuild.calledOnce).to.equal(true);
 				expect(stubBuild.calledWith([], [ext1, ext2])).to.equal(true);
 
 				done();
 				callback();
-			};
+			});
 
-			const options = {headerExtensions: [ext1, ext2]};
-			emitter.pipe(new PboTransformStream('a-pbo-file-name.pbo', options)).pipe(receiver);
+			const options = { headerExtensions: [ext1, ext2] };
+			emitter.pipe(new PboTransformStream('a-pbo-file-name.pbo', options)).pipe(reciever);
 		});
 	});
 });

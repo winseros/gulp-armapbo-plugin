@@ -3,9 +3,9 @@ import {PboHeaderEntry, PackingMethod} from '../../domain/pboHeaderEntry';
 import {PboHeaderExtension} from '../../domain/pboHeaderExtension';
 import {expect} from 'chai';
 
-describe('core/pboWriter', function () {
-	describe('writeHeaderEntry', function () {
-		it('should inflate buffer with entry data', function () {
+describe('core/pboWriter', function() {
+	describe('writeHeaderEntry', function() {
+		it('should inflate buffer with entry data', function() {
 			const entry = new PboHeaderEntry('entry-file-name', PackingMethod.packed, 100, new Date(2014, 4, 15).getTime() / 1000, 120);
 
 			const writer = new PboWriter();
@@ -20,9 +20,9 @@ describe('core/pboWriter', function () {
 		});
 	});
 
-	describe('writeHeaderExtension', function () {
-		it('should inflate buffer with extension data', function () {
-			const extension = new PboHeaderExtension("extension-name", "extension-value");
+	describe('writeHeaderExtension', function() {
+		it('should inflate buffer with extension data', function() {
+			const extension = new PboHeaderExtension('extension-name', 'extension-value');
 
 			const writer = new PboWriter();
 

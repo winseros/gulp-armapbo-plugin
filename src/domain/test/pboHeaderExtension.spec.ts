@@ -4,12 +4,12 @@ import {expect} from 'chai';
 describe('domain/pboHeaderExtension', function () {
 	describe('ctor', function () {
 		it('should throw if called with illegal args', function () {
-			expect(function () {
-				new PboHeaderExtension(null, null);
+			expect(() => {
+				return new PboHeaderExtension(null, null);
 			}).to.throw(/name/);
 
-			expect(function () {
-				new PboHeaderExtension('some-name', null);
+			expect(() => {
+				return new PboHeaderExtension('some-name', null);
 			}).to.throw(/value/);
 		});
 
@@ -21,7 +21,7 @@ describe('domain/pboHeaderExtension', function () {
 			expect(size).to.equal(20);
 		});
 	});
-	
+
 	describe('getBoundary', function () {
 		it('returns a boundary entry', function () {
 			let entry = PboHeaderExtension.getBoundary();

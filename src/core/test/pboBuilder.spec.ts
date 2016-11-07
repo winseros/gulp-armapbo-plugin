@@ -2,23 +2,23 @@ import {PboBuilder} from '../pboBuilder';
 import {PboHeaderExtension} from '../../domain/pboHeaderExtension';
 import {DummyStats} from './dummyStats';
 import {expect} from 'chai';
-import File = require('vinyl');
+import * as File from 'vinyl';
 
-describe('core/pboBuilder', function () {
-	describe('build', function () {
-		it('should throw if called with illegal args', function () {
+describe('core/pboBuilder', function() {
+	describe('build', function() {
+		it('should throw if called with illegal args', function() {
 			const builder = new PboBuilder();
 
-			expect(function () {
+			expect(function() {
 				builder.build(null, null);
 			}).to.throw(/contents/);
 
-			expect(function () {
+			expect(function() {
 				builder.build([], null);
 			}).to.throw(/headerExt/);
 		});
-		
-		it('should build a valid pbo', function () {
+
+		it('should build a valid pbo', function() {
 			const contents1 = new Buffer('some-buffer-contents-number-first');
 			const file1 = new File({
 				path: 'file1.txt',
@@ -62,4 +62,3 @@ describe('core/pboBuilder', function () {
 		});
 	});
 });
-

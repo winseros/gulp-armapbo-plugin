@@ -1,17 +1,17 @@
 import {Sha1} from '../sha1';
 import {expect} from 'chai';
 
-describe('core/sha1', function () {
-	describe('ctor', function () {
-		it('should throw if called with illegal args', function () {
-			expect(function () {
-				new Sha1(null);
+describe('core/sha1', function() {
+	describe('ctor', function() {
+		it('should throw if called with illegal args', function() {
+			expect(() => {
+				return new Sha1(null);
 			}).to.throw(/buffer/);
 		});
 	});
 
-	describe('get', function () {
-		it('should return a buffer with checksum', function () {
+	describe('get', function() {
+		it('should return a buffer with checksum', function() {
 			const str = 'some-string-to-get-checksum-of';
 			const buf = new Buffer(str);
 
