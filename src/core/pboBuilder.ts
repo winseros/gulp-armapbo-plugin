@@ -57,13 +57,13 @@ export class PboBuilder {
 		let entries = contents.filter(file => {
 			return file.contents ? true : false;//filter out directories
 		}).map(file => {
-			const fileSize = file.stat.size;
+			const fileData = file.contents as Buffer;
 			const timeStamp = file.stat.mtime.getTime() / 1000;
 
-			const entry = new PboHeaderEntry(file.relative, PackingMethod.uncompressed, fileSize, timeStamp, fileSize);
-			entry.contents = file.contents as Buffer;
+			const entry = new PboHeaderEntry(file.relative, PackingMethod.uncompressed, fileData.length, timeStamp, fileData.length);
+			entry.contents = fileData;
 
-			size += entry.getSize() + fileSize;
+			size += entry.getSize() + fileData.length;
 
 			return entry;
 		}) as EntriesCollection<IPboHeaderEntry>;

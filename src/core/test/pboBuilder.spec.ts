@@ -23,14 +23,14 @@ describe('core/pboBuilder', function() {
 			const file1 = new File({
 				path: 'file1.txt',
 				contents: contents1,
-				stat: new DummyStats(contents1.length, new Date(2014, 4, 15))
+				stat: new DummyStats(new Date(2014, 4, 15))
 			});
 
 			const contents2 = new Buffer('some-buffer-contents-number-second');
 			const file2 = new File({
 				path: 'file2.txt',
 				contents: contents2,
-				stat: new DummyStats(contents2.length, new Date(2014, 4, 20))
+				stat: new DummyStats(new Date(2014, 4, 20))
 			});
 
 			const extension1 = new PboHeaderExtension('first-extension-name', 'first-extension-value');

@@ -2,8 +2,7 @@ import {Stats} from 'fs';
 
 export class DummyStats implements Stats {
 
-	constructor(size: number, mtime: Date) {
-		this.size = size;
+	constructor(mtime: Date) {
 		this.mtime = mtime;
 	}
 

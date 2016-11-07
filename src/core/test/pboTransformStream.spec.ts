@@ -63,14 +63,14 @@ describe('core/pboTransformStream', function() {
 			const file1 = new File({
 				path: 'file1.txt',
 				contents: contents1,
-				stat: new DummyStats(contents1.length, new Date())
+				stat: new DummyStats(new Date())
 			});
 
 			const contents2 = new Buffer('some-buffer-contents-number-second');
 			const file2 = new File({
 				path: 'file2.txt',
 				contents: contents2,
-				stat: new DummyStats(contents2.length, new Date())
+				stat: new DummyStats(new Date())
 			});
 
 			let i = 0;
