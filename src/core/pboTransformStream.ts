@@ -35,10 +35,17 @@ export class PboTransformStream extends Transform {
 
         const data = this._builder.build(this._contentParts, extensions);
 
-        const fileName = this._options.fileName || path.dirname(process.cwd());
+        const fileName = this._options.fileName || this._getDefaultName();
         const result = new File({ path: fileName, contents: data });
 
         this.push(result);
         cb();
+    }
+
+    _getDefaultName(): string {
+        const cwd = process.cwd();
+        const segments = cwd.split(path.sep);
+        const name = `${segments[segments.length - 1]}.pbo`;
+        return name;
     }
 }

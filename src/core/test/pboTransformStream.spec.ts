@@ -5,8 +5,8 @@ import { StreamOptions } from '../streamOptions';
 import { Readable, Writable, Duplex } from 'stream';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { DummyStats } from './dummyStats';
 import * as File from 'vinyl';
+import * as path from 'path';
 
 describe('core/pboTransformStream', function () {
     let sandbox: sinon.SinonSandbox;
@@ -47,14 +47,14 @@ describe('core/pboTransformStream', function () {
             const file1 = new File({
                 path: 'file1.txt',
                 contents: contents1,
-                stat: new DummyStats(new Date())
+                stat: { mtime: new Date() } as any
             });
 
             const contents2 = new Buffer('some-buffer-contents-number-second');
             const file2 = new File({
                 path: 'file2.txt',
                 contents: contents2,
-                stat: new DummyStats(new Date())
+                stat: { mtime: new Date() } as any
             });
 
             let i = 0;
@@ -136,6 +136,35 @@ describe('core/pboTransformStream', function () {
             } as StreamOptions;
 
             emitter.pipe(new PboTransformStream(options)).pipe(reciever);
+        });
+
+        it('should create a pbo file with default name', (done: Function) => {
+            const contents = new Buffer('contents');
+            const stubBuild = sandbox.stub(PboBuilder.prototype, 'build').returns(contents);
+
+            const emitter = new Readable({
+                objectMode: true,
+                read: () => {
+                    emitter.push(null);
+                }
+            });
+
+            const reciever = new Writable({
+                objectMode: true,
+                write: (data: any, enc: string, callback: Function) => {
+                    expect(stubBuild.calledOnce).to.equal(true);
+
+                    const segments = process.cwd().split(path.sep);
+                    expect(data.basename).to.equal(`${segments[segments.length - 1]}.pbo`);
+                    expect(data.extname).to.equal('.pbo');
+                    expect(data.contents).to.equal(contents);
+
+                    callback();
+                    done();
+                }
+            });
+
+            emitter.pipe(new PboTransformStream()).pipe(reciever);
         });
     });
 });

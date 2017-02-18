@@ -1,6 +1,5 @@
 import { PboBuilder } from '../pboBuilder';
 import { PboHeaderExtension } from '../../domain/pboHeaderExtension';
-import { DummyStats } from './dummyStats';
 import { expect } from 'chai';
 import * as File from 'vinyl';
 
@@ -18,14 +17,14 @@ describe('core/pboBuilder', () => {
             const file1 = new File({
                 path: 'file1.txt',
                 contents: contents1,
-                stat: new DummyStats(new Date(2014, 4, 15))
+                stat: { mtime: new Date(2014, 4, 15) } as any
             });
 
             const contents2 = new Buffer('some-buffer-contents-number-second');
             const file2 = new File({
                 path: 'file2.txt',
                 contents: contents2,
-                stat: new DummyStats(new Date(2014, 4, 20))
+                stat: { mtime: new Date(2014, 4, 20) } as any
             });
 
             const extension1 = new PboHeaderExtension('first-extension-name', 'first-extension-value');
