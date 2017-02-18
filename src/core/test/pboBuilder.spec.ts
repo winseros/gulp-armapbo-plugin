@@ -17,14 +17,14 @@ describe('core/pboBuilder', () => {
             const file1 = new File({
                 path: 'file1.txt',
                 contents: contents1,
-                stat: { mtime: new Date(2014, 4, 15) } as any
+                stat: { mtime: new Date('2014-05-15T00:00:00+0300') } as any
             });
 
             const contents2 = new Buffer('some-buffer-contents-number-second');
             const file2 = new File({
                 path: 'file2.txt',
                 contents: contents2,
-                stat: { mtime: new Date(2014, 4, 20) } as any
+                stat: { mtime: new Date('2014-05-20T00:00:00+0300') } as any
             });
 
             const extension1 = new PboHeaderExtension('first-extension-name', 'first-extension-value');

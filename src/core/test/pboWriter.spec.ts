@@ -6,7 +6,7 @@ import { expect } from 'chai';
 describe('core/pboWriter', () => {
     describe('writeHeaderEntry', () => {
         it('should inflate buffer with entry data', () => {
-            const entry = new PboHeaderEntry('entry-file-name', PackingMethod.packed, 100, new Date(2014, 4, 15).getTime() / 1000, 120);
+            const entry = new PboHeaderEntry('entry-file-name', PackingMethod.packed, 100, Date.parse('2014-05-15T00:00:00+0300') / 1000, 120);
 
             const writer = new PboWriter();
 
