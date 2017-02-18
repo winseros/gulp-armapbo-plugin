@@ -1,3 +1,5 @@
+[![node][node-image]][node-url] [![npm][npm-image]][npm-url] [![Travis branch][travis-image]][travis-url] [![Coveralls branch][coveralls-image]][coveralls-url] [![Dependencies][david-image]][david-url]
+
 # Gulp Arma Pbo plugin
 
 The plugin's goal is to create Arma2/Arma3 pbo files from sources using [Gulp](http://gulpjs.com).
@@ -9,13 +11,14 @@ npm install gulp-armapbo
 
 ## Usage
 ```
-var gulp = require('gulp');
-var pbo = require('gulp-armapbo');
+const gulp = require('gulp');
+const pbo = require('gulp-armapbo');
 
-gulp.task('pack', function(){
+gulp.task('pack', () => {
     return gulp.src('pbo-contents/**/*')
-        .pipe(new pbo('my-file.pbo', {
-            headerExtensions: [{
+        .pipe(pbo({
+            fileName: 'my-file.pbo',
+            extensions: [{
                 name: 'author',
                 value: 'Author Name'
             }, {
@@ -28,16 +31,32 @@ gulp.task('pack', function(){
 ```
 
 ## Plugin API
-pbo(filename, [options])
+pbo([options])
 
-### filename
-Type: `string` - name of the pbo file to create, e.g. _someFileName.pbo_
+### Options
+Required: `no`
 
-Required: `yes`
-
-### options
-
-#### headerExtensions
-Type: `array of {name:<string>, value:<string>} objects`, e.g. _{name: 'author', value: 'Author Name' }_
+#### options.fileName
+Type: `string` - name of the pbo file to create, e.g. `someFileName.pbo`; if no value specified, the name of the `$cwd` is used
 
 Required: `no`
+
+#### options.extensions
+Type: array of `{name:<string>, value:<string>}` objects, e.g. `{name: 'author', value: 'Author Name' }`
+
+Required: `no`
+
+[node-url]: https://nodejs.org
+[node-image]: https://img.shields.io/node/v/gulp-armapbo.svg
+
+[npm-url]: https://www.npmjs.com/package/gulp-armapbo
+[npm-image]: https://img.shields.io/npm/v/gulp-armapbo.svg
+
+[travis-url]: https://travis-ci.org/winseros/gulp-armapbo-plugin
+[travis-image]: https://img.shields.io/travis/winseros/gulp-armapbo-plugin/master.svg
+
+[coveralls-url]: https://coveralls.io/github/winseros/gulp-armapbo-plugin
+[coveralls-image]: https://img.shields.io/coveralls/winseros/gulp-armapbo-plugin/master.svg
+
+[david-url]: https://david-dm.org/winseros/gulp-armapbo-plugin
+[david-image]: https://david-dm.org/winseros/gulp-armapbo-plugin/master.svg
