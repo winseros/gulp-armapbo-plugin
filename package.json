@@ -4,36 +4,46 @@
   "description": "The plugin for Gulp which allows to pack ArmA pbo files from sources.",
   "main": "dist/main.js",
   "scripts": {
-    "test": "./node_modules/.bin/gulp test",
-    "assemble": "./node_modules/.bin/gulp assemble"
+    "install:typings": "./node_modules/.bin/typings install",
+    "install:dev": "npm install && npm run install:typings",
+    "test": "./node_modules/.bin/gulp test:run",
+    "cover": "./node_modules/.bin/gulp cover:report",
+    "coveralls": "./node_modules/.bin/gulp cover:coveralls",
+    "assemble": "./node_modules/.bin/gulp assemble",
+    "watch": "./node_modules/.bin/gulp watch"
   },
   "keywords": [
     "arma",
     "arma2",
     "arma3",
     "pbo",
-    "gulp"
+    "gulpplugin"
   ],
   "author": "winse",
   "license": "MIT",
   "repository": "https://github.com/winseros/gulp-armapbo-plugin",
   "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-preset-env": "^1.1.8",
     "chai": "^3.5.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
+    "gulp-cached": "^1.1.1",
+    "gulp-coveralls": "^0.1.4",
+    "gulp-istanbul": "^1.1.1",
     "gulp-mocha": "^3.0.1",
-    "gulp-sourcemaps": "^2.2.0",
-    "gulp-tslint": "^6.1.3",
-    "gulp-typescript": "^3.1.2",
-    "mocha": "^3.1.2",
-    "sinon": "^1.17.6",
-    "tslint": "^3.15.1",
-    "typescript": "^2.0.7",
-    "typings": "^1.5.0",
-    "vinyl": "^2.0.0"
+    "gulp-sourcemaps": "^2.4.1",
+    "gulp-tslint": "^7.1.0",
+    "gulp-typescript": "^3.1.5",
+    "mocha": "^3.2.0",
+    "remap-istanbul": "^0.9.1",
+    "sinon": "^1.17.7",
+    "tslint": "^4.4.2",
+    "typescript": "^2.1.6",
+    "typings": "^2.1.0"
   },
   "dependencies": {
-    "vinyl": "^2.0.0"
+    "vinyl": "^2.0.1"
   },
   "files": [
     "dist/**/*.js",

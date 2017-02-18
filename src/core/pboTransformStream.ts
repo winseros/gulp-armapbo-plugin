@@ -1,45 +1,44 @@
-import {Transform} from 'stream';
-import {Assert} from '../util/assert';
-import {IPboHeaderExtension} from '../domain/pboHeaderExtension';
-import {PboBuilder} from './pboBuilder';
+import { Transform } from 'stream';
+import { PboHeaderExtension } from '../domain/pboHeaderExtension';
+import { PboBuilder } from './pboBuilder';
+import { StreamOptions } from './streamOptions';
+import * as path from 'path';
 import * as File from 'vinyl';
 
-interface VinylTransformCallback {
-	(err?:any, result?:File):void;
+export interface StreamCallback {
+    (err?: Error, result?: File): void;
 }
-
-export interface IPboStreamOptions {
-	headerExtensions: IPboHeaderExtension[];
-}
-
 export class PboTransformStream extends Transform {
-	private contentParts:File[] = [];
-	private options:IPboStreamOptions;
+    private _contentParts: File[] = [];
+    private _options: StreamOptions;
 
-	constructor(private pboFileName:string,
-				options?:IPboStreamOptions) {
-		super({objectMode: true});
-		Assert.isString(pboFileName, 'pboFileName');
+    private _builder = new PboBuilder();
 
-		this.options = options || {} as IPboStreamOptions;
-	}
+    constructor(options?: StreamOptions) {
+        super({ objectMode: true });
+        this._options = options || {} as StreamOptions;
+    }
 
-	_transform(file:File, encoding:string, callback:VinylTransformCallback):void {
-		if (file.isStream()) {
-			callback(new Error('Streaming input is not supported'));
-			return;
-		}
-		this.contentParts.push(file);
-		callback();
-	}
+    _transform(file: File, enc: string, cb: StreamCallback): void {
+        if (file.isStream()) {
+            cb(new Error('Streaming input is not supported'));
+            return;
+        }
+        this._contentParts.push(file);
+        cb();
+    }
 
-	_flush(callback:VinylTransformCallback):void {
-		let builder = new PboBuilder();
-		const data = builder.build(this.contentParts, this.options.headerExtensions || []);
+    _flush(cb: Function): void {
+        const extensions = this._options.extensions && Array.isArray(this._options.extensions)
+            ? this._options.extensions.map(ext => new PboHeaderExtension(ext.name, ext.value))
+            : [];
 
-		let result = new File({path: this.pboFileName, contents: data});
-		this.push(result);
+        const data = this._builder.build(this._contentParts, extensions);
 
-		callback();
-	}
+        const fileName = this._options.fileName || path.dirname(process.cwd());
+        const result = new File({ path: fileName, contents: data });
+
+        this.push(result);
+        cb();
+    }
 }

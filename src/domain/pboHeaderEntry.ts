@@ -1,51 +1,46 @@
-import {Assert} from '../util/assert';
+import { Assert } from '../util/assert';
 
 export enum PackingMethod {
-	uncompressed = 0x00000000,
-	packed = 0x43707273,
-	product = 0x56657273
+    uncompressed = 0x00000000,
+    packed = 0x43707273,
+    product = 0x56657273
 }
 
-export interface IPboHeaderEntry {
-	name: string;
-	packingMethod: PackingMethod;
-	originalSize: number;
-	reserved: number;
-	timestamp: number;
-	dataSize: number;
-	getSize(): number;
-	contents: Buffer;
-}
+export class PboHeaderEntry {
 
-export class PboHeaderEntry implements IPboHeaderEntry {
+    static getSignatureEntry(): PboHeaderEntry {
+        return new PboHeaderEntry('', PackingMethod.product, 0, 0, 0);
+    }
 
-	static getSignatureEntry(): IPboHeaderEntry {
-		return new PboHeaderEntry('', PackingMethod.product, 0, 0, 0);
-	}
+    static getBoundaryEntry(): PboHeaderEntry {
+        return new PboHeaderEntry('', PackingMethod.uncompressed, 0, 0, 0);
+    }
 
-	static getBoundaryEntry(): IPboHeaderEntry {
-		return new PboHeaderEntry('', PackingMethod.uncompressed, 0, 0, 0);
-	}
+    constructor(name: string, packingMethod: PackingMethod, originalSize: number, timestamp: number, dataSize: number) {
+        Assert.isNotNull(name, 'name');
 
-	public reserved: number;
-	public contents: Buffer;
+        this.name = name;
+        this.packingMethod = packingMethod;
+        this.originalSize = originalSize;
+        this.timestamp = timestamp;
+        this.dataSize = dataSize;
+    }
 
-	constructor(
-		public name: string,
-		public packingMethod: PackingMethod,
-		public originalSize: number,
-		public timestamp: number,
-		public dataSize: number) {
-		Assert.isNotNull(name, 'name');
-		Assert.isNumber(packingMethod, 'packingMethod');
-		Assert.isNumber(originalSize, 'originalSize');
-		Assert.isNumber(timestamp, 'timestamp');
-		Assert.isNumber(dataSize, 'dataSize');
+    readonly name: string;
 
-		this.reserved = 0;
-	}
+    readonly packingMethod: PackingMethod;
 
-	getSize(): number {
-		return this.name.length + 21;//name.length + 1 zero separator + 5 fields of 4-byte integers
-	}
+    readonly originalSize: number;
+
+    readonly timestamp: number;
+
+    readonly dataSize: number;
+
+    readonly reserved: number = 0;
+
+    contents: Buffer;
+
+    getSize(): number {
+        return this.name.length + 21;//name.length + 1 zero separator + 5 fields of 4-byte integers
+    }
 }

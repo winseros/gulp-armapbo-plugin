@@ -1,107 +1,100 @@
-import {IPboHeaderEntry, PboHeaderEntry, PackingMethod} from '../domain/pboHeaderEntry';
-import {IPboHeaderExtension, PboHeaderExtension} from '../domain/pboHeaderExtension';
-import {PboWriter} from './pboWriter';
-import {Assert} from '../util/assert';
-import {Sha1} from './sha1';
+import { PboHeaderEntry, PackingMethod } from '../domain/pboHeaderEntry';
+import { PboHeaderExtension } from '../domain/pboHeaderExtension';
+import { PboWriter } from './pboWriter';
+import { Assert } from '../util/assert';
+import { Sha1 } from './sha1';
 import * as File from 'vinyl';
 
-interface EntriesCollection<T> extends Array<T> {
-	size: number;
+export interface EntriesCollection<T> extends Array<T> {
+    size: number;
 }
 
 export class PboBuilder {
+    private static signatureBlockSize = 20;
 
-	private static signatureBlockSize = 20;
+    build(entries: File[], extensions: PboHeaderExtension[]): Buffer {
+        Assert.isNotNull(entries, 'entries');
+        Assert.isNotNull(extensions, 'extensions');
 
-	build(contents: File[], headerExt: IPboHeaderExtension[]): Buffer {
-		Assert.isNotNull(contents, 'contents');
-		Assert.isNotNull(headerExt, 'headerExt');
+        const signature = PboHeaderEntry.getSignatureEntry();
+        let size = signature.getSize();
 
-		let size = 0;
-		const signature = PboHeaderEntry.getSignatureEntry();
-		size += signature.getSize();
+        const headerExtensions = this._getHeaderExtensions(extensions);
+        size += headerExtensions.size + 1;//terminating null after the last one
 
-		const headerExtensions = this.getHeaderExtensions(headerExt);
-		size += headerExtensions.size + 1;//terminating null after the last one
+        const headerEntries = this._getHeaderEntries(entries);
+        size += headerEntries.size;
 
-		const headerEntries = this.getHeaderEntries(contents);
-		size += headerEntries.size;
+        const boundaryEntry = PboHeaderEntry.getBoundaryEntry();
+        size += boundaryEntry.getSize();
 
-		const boundaryEntry = PboHeaderEntry.getBoundaryEntry();
-		size += boundaryEntry.getSize();
+        const writer = new PboWriter();
 
-		const writer = new PboWriter();
+        const buffer = new Buffer(size + 1 + PboBuilder.signatureBlockSize);//1 terminating zero byte between data and signature
 
-		let result = new Buffer(size + 1 + PboBuilder.signatureBlockSize);//1 terminating zero byte between data and signature
+        let offset = writer.writeHeaderEntry(buffer, signature, 0);
+        offset = this._writeHeaderExtensions(writer, headerExtensions, buffer, offset);
+        offset = buffer.writeInt8(0, offset);
+        offset = this._writeHeaderEntries(writer, headerEntries, buffer, offset);
+        offset = writer.writeHeaderEntry(buffer, boundaryEntry, offset);
 
-		let offset = writer.writeHeaderEntry(result, signature, 0);
-		offset = this.writeHeaderExtensions(writer, headerExtensions, result, offset);
-		offset = result.writeInt8(0, offset);
-		offset = this.writeHeaderEntries(writer, headerEntries, result, offset);
-		offset = writer.writeHeaderEntry(result, boundaryEntry, offset);
+        offset = this._writeContents(headerEntries, buffer, offset);
 
-		offset = this.writeContents(headerEntries, result, offset);
+        const dataChunk = buffer.slice(0, offset);
+        const checkSum = new Sha1(dataChunk).get();
 
-		const dataChunk = result.slice(0, offset);
-		const checkSum = new Sha1(dataChunk).get();
+        offset = buffer.writeUInt8(0, offset);
 
-		offset = result.writeUInt8(0, offset);
+        checkSum.copy(buffer, offset, 0);
 
-		checkSum.copy(result, offset, 0);
+        return buffer;
+    }
 
-		return result;
-	}
+    _getHeaderEntries(entries: File[]): EntriesCollection<PboHeaderEntry> {
+        let size = 0;
+        const converted = entries
+            .filter(file => !!file.contents)//filter out directories
+            .map(file => {
+                const fileData = file.contents as Buffer;
+                const timeStamp = file.stat.mtime.getTime() / 1000;
 
-	private getHeaderEntries(contents: File[]): EntriesCollection<IPboHeaderEntry> {
-		let size = 0;
-		let entries = contents.filter(file => {
-			return file.contents ? true : false;//filter out directories
-		}).map(file => {
-			const fileData = file.contents as Buffer;
-			const timeStamp = file.stat.mtime.getTime() / 1000;
+                const entry = new PboHeaderEntry(file.relative, PackingMethod.uncompressed, fileData.length, timeStamp, fileData.length);
+                entry.contents = fileData;
 
-			const entry = new PboHeaderEntry(file.relative, PackingMethod.uncompressed, fileData.length, timeStamp, fileData.length);
-			entry.contents = fileData;
+                size += entry.getSize() + fileData.length;
 
-			size += entry.getSize() + fileData.length;
+                return entry;
+            }) as EntriesCollection<PboHeaderEntry>;
 
-			return entry;
-		}) as EntriesCollection<IPboHeaderEntry>;
+        converted.size = size;
+        return converted;
+    }
 
-		entries.size = size;
-		return entries;
-	}
+    _getHeaderExtensions(entries: PboHeaderExtension[]): EntriesCollection<PboHeaderExtension> {
+        const collection = entries as EntriesCollection<PboHeaderExtension>;
+        collection.size = collection.reduce((size: number, e: PboHeaderExtension) => size += e.getSize(), 0);
+        return collection;
+    }
 
-	private getHeaderExtensions(entries: IPboHeaderExtension[]): EntriesCollection<PboHeaderExtension> {
-		let size = 0;
-		let extensions = entries.map(entry => {
-			const ext = PboHeaderExtension.fromObject(entry);
-			size += ext.getSize();
-			return ext;
-		}) as EntriesCollection<PboHeaderExtension>;
-		extensions.size = size;
-		return extensions;
-	}
+    _writeHeaderExtensions(writer: PboWriter, extensions: PboHeaderExtension[], buffer: Buffer, offset: number): number {
+        extensions.forEach(extension => {
+            offset = writer.writeHeaderExtension(buffer, extension, offset);
+        });
+        return offset;
+    }
 
-	private writeHeaderExtensions(writer: PboWriter, extensions: PboHeaderExtension[], buffer: Buffer, offset: number): number {
-		extensions.forEach(extension => {
-			offset = writer.writeHeaderExtension(buffer, extension, offset);
-		});
-		return offset;
-	}
+    _writeHeaderEntries(writer: PboWriter, entries: PboHeaderEntry[], buffer: Buffer, offset: number): number {
+        entries.forEach(entry => {
+            offset = writer.writeHeaderEntry(buffer, entry, offset);
+        });
+        return offset;
+    }
 
-	private writeHeaderEntries(writer: PboWriter, entries: IPboHeaderEntry[], buffer: Buffer, offset: number): number {
-		entries.forEach(entry => {
-			offset = writer.writeHeaderEntry(buffer, entry, offset);
-		});
-		return offset;
-	}
+    _writeContents(entries: PboHeaderEntry[], buffer: Buffer, offset: number): number {
+        entries.forEach(entry => {
+            offset += entry.contents.copy(buffer, offset, 0);
+        });
 
-	private writeContents(entries: IPboHeaderEntry[], buffer: Buffer, offset: number): number {
-		entries.forEach(entry => {
-			offset += entry.contents.copy(buffer, offset, 0);
-		});
-
-		return offset;
-	}
+        return offset;
+    }
 }

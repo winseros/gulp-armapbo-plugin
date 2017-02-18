@@ -1,36 +1,38 @@
-import {PboHeaderExtension} from '../pboHeaderExtension';
-import {expect} from 'chai';
+import { PboHeaderExtension } from '../pboHeaderExtension';
+import { expect } from 'chai';
 
-describe('domain/pboHeaderExtension', function () {
-	describe('ctor', function () {
-		it('should throw if called with illegal args', function () {
-			expect(() => {
-				return new PboHeaderExtension(null, null);
-			}).to.throw(/name/);
+describe('domain/pboHeaderExtension', () => {
+    describe('ctor', () => {
+        it('should throw if called with illegal args', () => {
+            expect(() => new PboHeaderExtension(null as any, null as any)).to.throw(/name/);
+            expect(() => new PboHeaderExtension('some-name', null as any)).to.throw(/value/);
+        });
 
-			expect(() => {
-				return new PboHeaderExtension('some-name', null);
-			}).to.throw(/value/);
-		});
+        it('should initialize object', () => {
+            const extension = new PboHeaderExtension('ext-name', 'some-value');
 
-		it('should initialize object', function () {
-			let extension = new PboHeaderExtension('ext-name', 'some-value');
+            expect(extension.name).to.equal('ext-name');
+            expect(extension.value).to.equal('some-value');
+        });
+    });
 
-			const size = extension.getSize();
+    describe('getSize', () => {
+        it('return a valid package size', () => {
+            const extension = new PboHeaderExtension('ext-name', 'some-value');
+            const size = extension.getSize();
+            expect(size).to.equal(20);
+        });
+    });
 
-			expect(size).to.equal(20);
-		});
-	});
+    describe('getBoundary', () => {
+        it('returns a boundary entry', () => {
+            const entry = PboHeaderExtension.getBoundary();
 
-	describe('getBoundary', function () {
-		it('returns a boundary entry', function () {
-			let entry = PboHeaderExtension.getBoundary();
+            expect(entry).not.to.equal(null);
+            expect(entry).not.to.equal(undefined);
 
-			expect(entry).not.to.equal(null);
-			expect(entry).not.to.equal(undefined);
-
-			expect(entry.name).to.equal('');
-			expect(entry.value).to.equal('');
-		});
-	});
+            expect(entry.name).to.equal('');
+            expect(entry.value).to.equal('');
+        });
+    });
 });

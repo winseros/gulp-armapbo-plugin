@@ -1,5 +1,6 @@
-import {PboTransformStream, IPboStreamOptions} from './core/pboTransformStream';
+import { PboTransformStream } from './core/pboTransformStream';
+import { StreamOptions } from './core/streamOptions';
 
-export = function (pboFileName:string, options:IPboStreamOptions):PboTransformStream {
-	return new PboTransformStream(pboFileName, options);
+export = (options?: StreamOptions): PboTransformStream => {
+    return new PboTransformStream(options);
 };

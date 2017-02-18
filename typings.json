@@ -1,13 +1,13 @@
 {
-  "name": "gulp-armapbo-plugin",
-  "dependencies": {},
-  "globalDevDependencies": {
-    "mocha": "registry:dt/mocha#2.2.5+20160720003353",
-    "node": "registry:dt/node#6.0.0+20161019125345"
-  },
-  "devDependencies": {
-    "chai": "registry:npm/chai#3.5.0+20160723033700",
-    "sinon": "registry:npm/sinon#1.16.0+20160723033700",
-    "vinyl": "registry:npm/vinyl#1.2.0+20161017220031"
-  }
+    "name": "gulp-armapbo-plugin",
+    "dependencies": {},
+    "globalDevDependencies": {
+        "mocha": "registry:dt/mocha#2.2.5+20170204022515",
+        "node/v6": "registry:dt/node/v6#6.0.0+20170126212502"
+    },
+    "devDependencies": {
+        "chai": "registry:npm/chai#3.5.0+20160723033700",
+        "sinon": "registry:npm/sinon#1.16.0+20160723033700",
+        "vinyl": "registry:npm/vinyl#1.2.0+20161017220031"
+    }
 }
