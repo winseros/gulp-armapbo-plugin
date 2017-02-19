@@ -42,7 +42,7 @@ describe('core/pboHeaderWriter', () => {
             const header = new Header([], [ent1, ent2]);
 
             const size = new PboHeaderWriter().measureBody(header);
-            expect(size).to.equal(15);
+            expect(size).to.equal(25);
         });
     });
 });

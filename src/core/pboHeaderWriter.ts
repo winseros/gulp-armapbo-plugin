@@ -22,7 +22,7 @@ export class PboHeaderWriter {
     }
 
     measureBody(header: Header): number {
-        const size = header.entries.reduce((s, e) => e.contents.length, 0);
+        const size = header.entries.reduce((s, e) => s + e.contents.length, 0);
         return size;
     }
 }
