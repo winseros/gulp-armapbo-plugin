@@ -28,8 +28,8 @@ export class PboBuilder {
             return entry;
         }).sort((a, b) => {
             if (a.packingMethod === b.packingMethod) { return 0; }
-            if (a.packingMethod === PackingMethod.packed) { return -1; }
-            return 1;
+            if (a.packingMethod === PackingMethod.packed) { return 1; }//unpacked files first to create a buffer for lzh compression
+            return -1;
         });
 
         const header = new Header(extensions, entries);

@@ -1,6 +1,5 @@
 import { Transform } from 'stream';
-import { HeaderExtension } from '../domain/headerExtension';
-import { PboBuilder } from './pboBuilder';
+import { PboBuilder } from './pboBuilder2';
 import { StreamOptions } from './streamOptions';
 import * as path from 'path';
 import * as File from 'vinyl';
@@ -26,11 +25,7 @@ export class PboTransformStream extends Transform {
     }
 
     _flush(cb: Function): void {
-        const extensions = this._options.extensions && Array.isArray(this._options.extensions)
-            ? this._options.extensions.map(ext => new HeaderExtension(ext.name, ext.value))
-            : [];
-
-        const data = this._builder.build(this._contentParts, extensions);
+        const data = this._builder.build(this._contentParts, this._options);
 
         const fileName = this._options.fileName || this._getDefaultName();
         const result = new File({ path: fileName, contents: data });

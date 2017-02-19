@@ -1,58 +1,133 @@
-/*import { PboBuilder } from '../pboBuilder';
+import { PboBuilder } from '../pboBuilder2';
+import { PboFormatter } from '../pboFormatter';
+import { StreamOptions } from '../streamOptions';
+import { Header } from '../../domain/header';
 import { HeaderExtension } from '../../domain/headerExtension';
-import { expect } from 'chai';
+import { HeaderEntry } from '../../domain/headerEntry';
+import { PackingMethod } from '../../domain/packingMethod';
 import * as File from 'vinyl';
+import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 describe('core/pboBuilder', () => {
+    let sandbox: sinon.SinonSandbox;
+
+    beforeEach(() => {
+        sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+        sandbox.restore();
+    });
+
     describe('build', () => {
-        it('should throw if called with illegal args', () => {
-            const builder = new PboBuilder();
-            const any = null as any;
-            expect(() => builder.build(any, any)).to.throw(/entries/);
-            expect(() => builder.build([], any)).to.throw(/extensions/);
+        it('should handle options.extensions and call the inner services', () => {
+            const options = {
+                extensions: [
+                    { name: 'ext1n', value: 'ext1v' },
+                    { name: 'ext2n', value: 'ext2v' }
+                ]
+            } as StreamOptions;
+
+            const contents1 = Buffer.allocUnsafe(10);
+            const file1 = new File({ path: 'file1.txt', contents: contents1, stat: { mtime: new Date('2015-05-15T00:00:00+0000') } as any });
+            const contents2 = Buffer.allocUnsafe(15);
+            const file2 = new File({ path: 'file2.txt', contents: contents2, stat: { mtime: new Date('2015-05-20T00:00:00+0000') } as any });
+
+            const result = Buffer.allocUnsafe(20);
+            const stubFormat = sandbox.stub(PboFormatter.prototype, 'format').returns(result);
+
+            const data = new PboBuilder().build([file1, file2], options);
+            expect(data).to.equal(result);
+
+            //header
+            expect(stubFormat.callCount).to.equal(1);
+            const header = stubFormat.args[0][0] as Header;
+            expect(header).to.be.instanceof(Header);
+
+            //extensions
+            expect(header.extensions.length).to.equal(2);
+            expect(header.extensions[0]).to.be.instanceof(HeaderExtension);
+            expect(header.extensions[0].name).to.equal('ext1n');
+            expect(header.extensions[0].value).to.equal('ext1v');
+            expect(header.extensions[1]).to.be.instanceof(HeaderExtension);
+            expect(header.extensions[1].name).to.equal('ext2n');
+            expect(header.extensions[1].value).to.equal('ext2v');
+
+            //entries
+            expect(header.entries.length).to.equal(2);
+
+            //entry1
+            expect(header.entries[0]).to.be.instanceof(HeaderEntry);
+            expect(header.entries[0].name).to.equal('file1.txt');
+            expect(header.entries[0].packingMethod).to.equal(PackingMethod.uncompressed);
+            expect(header.entries[0].originalSize).to.equal(contents1.length);
+            expect(header.entries[0].dataSize).to.equal(contents1.length);
+            expect(header.entries[0].contents).to.equal(contents1);
+            expect(header.entries[0].timestamp).to.equal(file1.stat.mtime.getTime() / 1000);
+
+            //entry2
+            expect(header.entries[1]).to.be.instanceof(HeaderEntry);
+            expect(header.entries[1].name).to.equal('file2.txt');
+            expect(header.entries[1].packingMethod).to.equal(PackingMethod.uncompressed);
+            expect(header.entries[1].originalSize).to.equal(contents2.length);
+            expect(header.entries[1].dataSize).to.equal(contents2.length);
+            expect(header.entries[1].contents).to.equal(contents2);
+            expect(header.entries[1].timestamp).to.equal(file2.stat.mtime.getTime() / 1000);
         });
 
-        it('should build a valid pbo', () => {
-            const contents1 = new Buffer('some-buffer-contents-number-first');
-            const file1 = new File({
-                path: 'file1.txt',
-                contents: contents1,
-                stat: { mtime: new Date('2014-05-15T00:00:00+0300') } as any
-            });
+        it('should handle options.compress as a string', () => {
+            const options = {
+                compress: '*.sqf'
+            } as StreamOptions;
 
-            const contents2 = new Buffer('some-buffer-contents-number-second');
-            const file2 = new File({
-                path: 'file2.txt',
-                contents: contents2,
-                stat: { mtime: new Date('2014-05-20T00:00:00+0300') } as any
-            });
+            const contents1 = Buffer.allocUnsafe(10);
+            const file1 = new File({ path: 'file1.sqf', contents: contents1, stat: { mtime: new Date('2015-05-15T00:00:00+0000') } as any });
+            const contents2 = Buffer.allocUnsafe(15);
+            const file2 = new File({ path: 'file2.txt', contents: contents2, stat: { mtime: new Date('2015-05-20T00:00:00+0000') } as any });
+            const contents3 = Buffer.allocUnsafe(15);
+            const file3 = new File({ path: 'file3.sqf', contents: contents3, stat: { mtime: new Date('2015-05-25T00:00:00+0000') } as any });
 
-            const extension1 = new HeaderExtension('first-extension-name', 'first-extension-value');
-            const extension2 = new HeaderExtension('second-extension-name', 'second-extension-value');
+            const result = Buffer.allocUnsafe(20);
+            const stubFormat = sandbox.stub(PboFormatter.prototype, 'format').returns(result);
 
-            const builder = new PboBuilder();
-            const buffer = builder.build([file1, file2], [extension1, extension2]);
+            const data = new PboBuilder().build([file1, file2, file3], options);
+            expect(data).to.equal(result);
 
-            expect(buffer).not.to.equal(null);
-            expect(buffer).not.to.equal(undefined);
+            const header = stubFormat.args[0][0] as Header;
 
-            expect(buffer.length).to.equal(279);
+            //entries
+            expect(header.entries.length).to.equal(3);
+            expect(header.entries[0].name).to.equal('file2.txt');
+            expect(header.entries[1].name).to.equal('file1.sqf');
+            expect(header.entries[2].name).to.equal('file3.sqf');
+        });
 
-            const expected = new Buffer([0, 115, 114, 101, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 102,
-                105, 114, 115, 116, 45, 101, 120, 116, 101, 110, 115, 105, 111, 110, 45, 110, 97, 109, 101, 0, 102,
-                105, 114, 115, 116, 45, 101, 120, 116, 101, 110, 115, 105, 111, 110, 45, 118, 97, 108, 117, 101, 0,
-                115, 101, 99, 111, 110, 100, 45, 101, 120, 116, 101, 110, 115, 105, 111, 110, 45, 110, 97, 109, 101,
-                0, 115, 101, 99, 111, 110, 100, 45, 101, 120, 116, 101, 110, 115, 105, 111, 110, 45, 118, 97, 108,
-                117, 101, 0, 0, 102, 105, 108, 101, 49, 46, 116, 120, 116, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0,
-                80, 217, 115, 83, 33, 0, 0, 0, 102, 105, 108, 101, 50, 46, 116, 120, 116, 0, 0, 0, 0, 0, 34, 0, 0,
-                0, 0, 0, 0, 0, 208, 112, 122, 83, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 115, 111, 109, 101, 45, 98, 117, 102, 102, 101, 114, 45, 99, 111, 110, 116, 101, 110, 116,
-                115, 45, 110, 117, 109, 98, 101, 114, 45, 102, 105, 114, 115, 116, 115, 111, 109, 101, 45, 98, 117,
-                102, 102, 101, 114, 45, 99, 111, 110, 116, 101, 110, 116, 115, 45, 110, 117, 109, 98, 101, 114, 45,
-                115, 101, 99, 111, 110, 100, 0, 74, 246, 111, 61, 67, 189, 91, 87, 60, 204, 73, 38, 246, 189, 139,
-                211, 147, 222, 140, 238]);
+        it('should handle options.compress as an array', () => {
+            const options = {
+                compress: ['*.sqf', '*.ext']
+            } as StreamOptions;
 
-            expect(buffer).to.eql(expected);
+            const contents1 = Buffer.allocUnsafe(10);
+            const file1 = new File({ path: 'file1.sqf', contents: contents1, stat: { mtime: new Date('2015-05-15T00:00:00+0000') } as any });
+            const contents2 = Buffer.allocUnsafe(15);
+            const file2 = new File({ path: 'file2.txt', contents: contents2, stat: { mtime: new Date('2015-05-20T00:00:00+0000') } as any });
+            const contents3 = Buffer.allocUnsafe(15);
+            const file3 = new File({ path: 'file3.ext', contents: contents3, stat: { mtime: new Date('2015-05-25T00:00:00+0000') } as any });
+
+            const result = Buffer.allocUnsafe(20);
+            const stubFormat = sandbox.stub(PboFormatter.prototype, 'format').returns(result);
+
+            const data = new PboBuilder().build([file1, file2, file3], options);
+            expect(data).to.equal(result);
+
+            const header = stubFormat.args[0][0] as Header;
+
+            //entries
+            expect(header.entries.length).to.equal(3);
+            expect(header.entries[0].name).to.equal('file2.txt');
+            expect(header.entries[1].name).to.equal('file1.sqf');
+            expect(header.entries[2].name).to.equal('file3.ext');
         });
     });
-});*/
+});
