@@ -1,4 +1,4 @@
-import { PboHeaderEntry, PackingMethod } from '../domain/pboHeaderEntry';
+/*import { PboHeaderEntry, PackingMethod } from '../domain/pboHeaderEntry';
 import { PboHeaderExtension } from '../domain/pboHeaderExtension';
 import { PboWriter } from './pboWriter';
 import { Assert } from '../util/assert';
@@ -98,3 +98,4 @@ export class PboBuilder {
         return offset;
     }
 }
+*/

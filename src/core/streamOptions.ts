@@ -6,4 +6,5 @@ export interface IHeaderExtension {
 export interface StreamOptions {
     fileName?: string;
     extensions?: IHeaderExtension[];
+    compress?: string | string[];
 }

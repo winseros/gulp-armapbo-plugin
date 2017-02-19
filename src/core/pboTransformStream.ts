@@ -1,4 +1,4 @@
-import { Transform } from 'stream';
+/*import { Transform } from 'stream';
 import { PboHeaderExtension } from '../domain/pboHeaderExtension';
 import { PboBuilder } from './pboBuilder';
 import { StreamOptions } from './streamOptions';
@@ -49,3 +49,4 @@ export class PboTransformStream extends Transform {
         return name;
     }
 }
+*/

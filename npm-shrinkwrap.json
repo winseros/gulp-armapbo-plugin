@@ -2603,7 +2603,7 @@
     },
     "minimatch": {
       "version": "3.0.3",
-      "from": "minimatch@>=3.0.2 <4.0.0",
+      "from": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.3.tgz",
       "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.3.tgz",
       "dev": true
     },

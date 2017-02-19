@@ -1,8 +1,8 @@
-import { PboHeaderEntry } from '../domain/pboHeaderEntry';
-import { PboHeaderExtension } from '../domain/pboHeaderExtension';
+import { HeaderEntry } from '../domain/headerEntry';
+import { HeaderExtension } from '../domain/headerExtension';
 
 export class PboWriter {
-    writeHeaderEntry(buffer: Buffer, entry: PboHeaderEntry, offset: number): number {
+    writeHeaderEntry(buffer: Buffer, entry: HeaderEntry, offset: number): number {
         offset = this._writeNullTerminatedString(buffer, entry.name, offset);
         offset = buffer.writeInt32LE(entry.packingMethod, offset);
         offset = buffer.writeInt32LE(entry.originalSize, offset);
@@ -12,7 +12,7 @@ export class PboWriter {
         return offset;
     }
 
-    writeHeaderExtension(buffer: Buffer, extension: PboHeaderExtension, offset: number): number {
+    writeHeaderExtension(buffer: Buffer, extension: HeaderExtension, offset: number): number {
         offset = this._writeNullTerminatedString(buffer, extension.name, offset);
         offset = this._writeNullTerminatedString(buffer, extension.value, offset);
         return offset;

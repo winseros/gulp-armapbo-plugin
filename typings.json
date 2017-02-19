@@ -7,6 +7,7 @@
     },
     "devDependencies": {
         "chai": "registry:npm/chai#3.5.0+20160723033700",
+        "minimatch": "registry:npm/minimatch#3.0.0+20170119000329",
         "sinon": "registry:npm/sinon#1.16.0+20160723033700",
         "vinyl": "registry:npm/vinyl#1.2.0+20161017220031"
     }

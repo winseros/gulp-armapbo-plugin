@@ -1,15 +1,15 @@
-import { PboHeaderExtension } from '../pboHeaderExtension';
+import { HeaderExtension } from '../headerExtension';
 import { expect } from 'chai';
 
-describe('domain/pboHeaderExtension', () => {
+describe('domain/headerExtension', () => {
     describe('ctor', () => {
         it('should throw if called with illegal args', () => {
-            expect(() => new PboHeaderExtension(null as any, null as any)).to.throw(/name/);
-            expect(() => new PboHeaderExtension('some-name', null as any)).to.throw(/value/);
+            expect(() => new HeaderExtension(null as any, null as any)).to.throw(/name/);
+            expect(() => new HeaderExtension('some-name', null as any)).to.throw(/value/);
         });
 
         it('should initialize object', () => {
-            const extension = new PboHeaderExtension('ext-name', 'some-value');
+            const extension = new HeaderExtension('ext-name', 'some-value');
 
             expect(extension.name).to.equal('ext-name');
             expect(extension.value).to.equal('some-value');
@@ -18,7 +18,7 @@ describe('domain/pboHeaderExtension', () => {
 
     describe('getSize', () => {
         it('return a valid package size', () => {
-            const extension = new PboHeaderExtension('ext-name', 'some-value');
+            const extension = new HeaderExtension('ext-name', 'some-value');
             const size = extension.getSize();
             expect(size).to.equal(20);
         });
@@ -26,7 +26,7 @@ describe('domain/pboHeaderExtension', () => {
 
     describe('getBoundary', () => {
         it('returns a boundary entry', () => {
-            const entry = PboHeaderExtension.getBoundary();
+            const entry = HeaderExtension.getBoundary();
 
             expect(entry).not.to.equal(null);
             expect(entry).not.to.equal(undefined);

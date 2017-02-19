@@ -1,5 +1,5 @@
-import { PboBuilder } from '../pboBuilder';
-import { PboHeaderExtension } from '../../domain/pboHeaderExtension';
+/*import { PboBuilder } from '../pboBuilder';
+import { HeaderExtension } from '../../domain/headerExtension';
 import { expect } from 'chai';
 import * as File from 'vinyl';
 
@@ -27,8 +27,8 @@ describe('core/pboBuilder', () => {
                 stat: { mtime: new Date('2014-05-20T00:00:00+0300') } as any
             });
 
-            const extension1 = new PboHeaderExtension('first-extension-name', 'first-extension-value');
-            const extension2 = new PboHeaderExtension('second-extension-name', 'second-extension-value');
+            const extension1 = new HeaderExtension('first-extension-name', 'first-extension-value');
+            const extension2 = new HeaderExtension('second-extension-name', 'second-extension-value');
 
             const builder = new PboBuilder();
             const buffer = builder.build([file1, file2], [extension1, extension2]);
@@ -55,4 +55,4 @@ describe('core/pboBuilder', () => {
             expect(buffer).to.eql(expected);
         });
     });
-});
+});*/
