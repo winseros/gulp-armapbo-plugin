@@ -6,13 +6,23 @@ import { PackingMethod } from '../packingMethod';
 import * as sinon from 'sinon';
 
 describe('domain/header', () => {
+    let sandbox: sinon.SinonSandbox;
+
+    beforeEach(() => {
+        sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+        sandbox.restore();
+    });
+
     describe('ctor', () => {
         it('should initialize fields', () => {
 
             const signature = { prop: 'signature' } as any;
-            sinon.stub(HeaderEntry, 'getSignatureEntry').returns(signature);
+            sandbox.stub(HeaderEntry, 'getSignatureEntry').returns(signature);
             const boundary = { prop: 'boundary' } as any;
-            sinon.stub(HeaderEntry, 'getBoundaryEntry').returns(boundary);
+            sandbox.stub(HeaderEntry, 'getBoundaryEntry').returns(boundary);
 
             const extensions = [new HeaderExtension('h_ext_n', 'h_ext_v')];
             const entries = [new HeaderEntry('', PackingMethod.uncompressed, 0, 0)];
