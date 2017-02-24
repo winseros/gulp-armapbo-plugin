@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import { Header } from '../header';
+import { HeaderExtension } from '../headerExtension';
 import { HeaderEntry } from '../headerEntry';
+import { PackingMethod } from '../packingMethod';
 import * as sinon from 'sinon';
 
 describe('domain/header', () => {
@@ -12,8 +14,8 @@ describe('domain/header', () => {
             const boundary = { prop: 'boundary' } as any;
             sinon.stub(HeaderEntry, 'getBoundaryEntry').returns(boundary);
 
-            const extensions = { prop: 'extensions' } as any;
-            const entries = { prop: 'entries' } as any;
+            const extensions = [new HeaderExtension('h_ext_n', 'h_ext_v')];
+            const entries = [new HeaderEntry('', PackingMethod.uncompressed, 0, 0)];
 
             const header = new Header(extensions, entries);
 
@@ -21,6 +23,19 @@ describe('domain/header', () => {
             expect(header.entries).to.equal(entries);
             expect(header.signature).to.equal(signature);
             expect(header.boundary).to.equal(boundary);
+            expect(header.packed).to.equal(false);
+        });
+
+        it('should initialize packed to true', () => {
+            const entries = [
+                new HeaderEntry('', PackingMethod.uncompressed, 0, 0),
+                new HeaderEntry('', PackingMethod.uncompressed, 0, 0),
+                new HeaderEntry('', PackingMethod.packed, 0, 0),
+                new HeaderEntry('', PackingMethod.uncompressed, 0, 0)
+            ];
+
+            const header = new Header([], entries);
+            expect(header.packed).to.equal(true);
         });
     });
 });

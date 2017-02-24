@@ -24,6 +24,10 @@ describe('core/pboBodyWriter', () => {
             const entry2 = { contents: Buffer.allocUnsafe(15) } as any;
             const header = new Header([], [entry1, entry2]);
 
+            const stubGetDict = sandbox.stub(PboBodyWriter.prototype, '_getCompressionDict');
+            const dict = { prop: 'dict' };
+            stubGetDict.returns(dict);
+
             const stubWrite = sandbox.stub(PboBodyWriter.prototype, '_writeEntry');
             stubWrite.onFirstCall().returns(entry1.contents.length)
                 .onSecondCall().returns(entry2.contents.length);
@@ -33,19 +37,22 @@ describe('core/pboBodyWriter', () => {
 
             expect(written).to.equal(entry1.contents.length + entry2.contents.length);
 
+            expect(stubGetDict.callCount).to.equal(1);
             expect(stubWrite.callCount).to.equal(2);
 
             let args = stubWrite.args[0];
-            expect(args.length).to.equal(3);
+            expect(args.length).to.equal(4);
             expect(args[0]).to.equal(buf);
             expect(args[1]).to.equal(entry1);
             expect(args[2]).to.equal(0);
+            expect(args[3]).to.equal(dict);
 
             args = stubWrite.args[1];
-            expect(args.length).to.equal(3);
+            expect(args.length).to.equal(4);
             expect(args[0]).to.equal(buf);
             expect(args[1]).to.equal(entry2);
             expect(args[2]).to.equal(entry1.contents.length);
+            expect(args[3]).to.equal(dict);
         });
     });
 
@@ -58,18 +65,26 @@ describe('core/pboBodyWriter', () => {
             stubCompressed.returns(2);
 
             const entry = new HeaderEntry('', PackingMethod.uncompressed, 0, 0);
-
             const buf = Buffer.allocUnsafe(10);
-            const written = new PboBodyWriter()._writeEntry(buf, entry, 2);
+            const dict = { prop: 'dict' } as any;
+
+            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, dict);
 
             expect(written).to.equal(1);
             expect(entry.dataSize).to.equal(1);
 
             expect(stubUncompressed.callCount).to.equal(1);
             expect(stubCompressed.callCount).to.equal(0);
+
+            const args = stubUncompressed.args[0];
+            expect(args.length).to.equal(4);
+            expect(args[0]).to.equal(buf);
+            expect(args[1]).to.equal(entry);
+            expect(args[2]).to.equal(2);
+            expect(args[3]).to.equal(dict);
         });
 
-        it('should write entry uncompressed if packing method is "compressed" but not enough data before the entry', () => {
+        it('should write entry uncompressed if packing method is "packed" but dict is missing', () => {
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
             const stubCompressed = sandbox.stub(PboBodyWriter.prototype, '_writeCompressed');
 
@@ -77,18 +92,25 @@ describe('core/pboBodyWriter', () => {
             stubCompressed.returns(2);
 
             const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
-
             const buf = Buffer.allocUnsafe(10);
-            const written = new PboBodyWriter()._writeEntry(buf, entry, 2);
+
+            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, undefined);
 
             expect(written).to.equal(1);
             expect(entry.dataSize).to.equal(1);
 
             expect(stubUncompressed.callCount).to.equal(1);
             expect(stubCompressed.callCount).to.equal(0);
+
+            const args = stubUncompressed.args[0];
+            expect(args.length).to.equal(4);
+            expect(args[0]).to.equal(buf);
+            expect(args[1]).to.equal(entry);
+            expect(args[2]).to.equal(2);
+            expect(args[3]).to.equal(undefined);
         });
 
-        it('should write entry compressed if packing method is "compressed" and enough data before the entry', () => {
+        it('should write entry uncompressed if packing method is "packed" but dict is not full', () => {
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
             const stubCompressed = sandbox.stub(PboBodyWriter.prototype, '_writeCompressed');
 
@@ -96,15 +118,50 @@ describe('core/pboBodyWriter', () => {
             stubCompressed.returns(2);
 
             const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
-
             const buf = Buffer.allocUnsafe(10);
-            const written = new PboBodyWriter()._writeEntry(buf, entry, PboBodyWriter.minOffsetToPack);
+            const dict = { isFull: false } as any;
+
+            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, dict);
+
+            expect(written).to.equal(1);
+            expect(entry.dataSize).to.equal(1);
+
+            expect(stubUncompressed.callCount).to.equal(1);
+            expect(stubCompressed.callCount).to.equal(0);
+
+            const args = stubUncompressed.args[0];
+            expect(args.length).to.equal(4);
+            expect(args[0]).to.equal(buf);
+            expect(args[1]).to.equal(entry);
+            expect(args[2]).to.equal(2);
+            expect(args[3]).to.equal(dict);
+        });
+
+        it('should write entry compressed if packing method is "packed" and dict is full', () => {
+            const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
+            const stubCompressed = sandbox.stub(PboBodyWriter.prototype, '_writeCompressed');
+
+            stubUncompressed.returns(1);
+            stubCompressed.returns(2);
+
+            const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
+            const buf = Buffer.allocUnsafe(10);
+            const dict = { isFull: true } as any;
+
+            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, dict);
 
             expect(written).to.equal(2);
             expect(entry.dataSize).to.equal(2);
 
             expect(stubUncompressed.callCount).to.equal(0);
             expect(stubCompressed.callCount).to.equal(1);
+
+            const args = stubCompressed.args[0];
+            expect(args.length).to.equal(4);
+            expect(args[0]).to.equal(buf);
+            expect(args[1]).to.equal(entry);
+            expect(args[2]).to.equal(2);
+            expect(args[3]).to.equal(dict);
         });
     });
 
@@ -114,12 +171,25 @@ describe('core/pboBodyWriter', () => {
             entry.contents = Buffer.from([0x01, 0x02, 0x03]);
 
             const buf = Buffer.alloc(10);
-            const written = new PboBodyWriter()._writeUncompressed(buf, entry, 3);
+            const dict = { add: sandbox.spy() } as any;
+            const written = new PboBodyWriter()._writeUncompressed(buf, entry, 3, dict);
 
             expect(written).to.equal(3);
 
             const expected = Buffer.from([0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00]);
             expect(buf).to.eql(expected);
+
+            expect(dict.add.callCount).to.equal(1);
+            expect(dict.add.args[0].length).to.equal(1);
+            expect(dict.add.args[0][0]).to.equal(entry.contents);
+        });
+
+        it('should not throw if called without a dict', () => {
+            const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
+            entry.contents = Buffer.from([0x01, 0x02, 0x03]);
+
+            const buf = Buffer.alloc(10);
+            expect(() => new PboBodyWriter()._writeUncompressed(buf, entry, 3)).not.to.throw();
         });
     });
 
@@ -134,8 +204,10 @@ describe('core/pboBodyWriter', () => {
             const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
             entry.contents = Buffer.allocUnsafe(5);
 
+            const dict = { prop: 'dict' } as any;
+
             const buf = Buffer.allocUnsafe(10);
-            const written = new PboBodyWriter()._writeCompressed(buf, entry, 100500);
+            const written = new PboBodyWriter()._writeCompressed(buf, entry, 100500, dict);
 
             expect(written).to.equal(1);
 
@@ -143,40 +215,11 @@ describe('core/pboBodyWriter', () => {
             expect(stubCompressed.callCount).to.equal(1);
 
             const args = stubCompressed.args[0];
+            expect(args.length).to.equal(4);
             expect(args[0]).to.equal(entry.contents);
             expect(args[1]).to.equal(buf);
             expect(args[2]).to.equal(100500);
-        });
-
-        it('should overrite compressed data with normal if compression was not sucessfull', () => {
-            const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
-            const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
-
-            stubCompressed.returns(6);
-            stubUncompressed.returns(5);
-
-            const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
-            entry.contents = Buffer.allocUnsafe(5);
-
-            const buf = Buffer.allocUnsafe(10);
-            const written = new PboBodyWriter()._writeCompressed(buf, entry, 100500);
-
-            expect(written).to.equal(5);
-
-            expect(stubUncompressed.callCount).to.equal(1);
-            expect(stubCompressed.callCount).to.equal(1);
-
-            //1st - attempt to write compressed data
-            let args = stubCompressed.args[0];
-            expect(args[0]).to.equal(entry.contents);
-            expect(args[1]).to.equal(buf);
-            expect(args[2]).to.equal(100500);
-
-            //2nd - compressed data was rewritten by a normal one
-            args = stubUncompressed.args[0];
-            expect(args[0]).to.equal(buf);
-            expect(args[1]).to.equal(entry);
-            expect(args[2]).to.equal(100500);
+            expect(args[3]).to.equal(dict);
         });
     });
 });
