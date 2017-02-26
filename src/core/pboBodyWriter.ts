@@ -1,8 +1,8 @@
 import { Header } from '../domain/header';
 import { HeaderEntry } from '../domain/headerEntry';
 import { PackingMethod } from '../domain/packingMethod';
-import { LzhCompressor } from './lzhCompressor';
-import { StackBuffer } from './stackBuffer';
+import { LzhCompressor } from './lzh/lzhCompressor';
+import { StackBuffer } from './lzh/stackBuffer';
 
 export class PboBodyWriter {
     private _lzhCompressor = new LzhCompressor();
@@ -27,13 +27,13 @@ export class PboBodyWriter {
         const impl = dict && dict.isFull && entry.packingMethod === PackingMethod.packed
             ? this._writeCompressed
             : this._writeUncompressed;
-        entry.dataSize = impl(buffer, entry, offset, dict!);
+        entry.dataSize = impl.call(this, buffer, entry, offset, dict!);
         return entry.dataSize;
     }
 
     _writeUncompressed(buffer: Buffer, entry: HeaderEntry, offset: number, dict?: StackBuffer): number {
         const written = entry.contents.copy(buffer, offset, 0, entry.contents.length);
-        dict && dict.add(entry.contents);//tslint:disable-line:no-unused-expression
+        dict && dict.add(entry.contents, 0, entry.contents.length);//tslint:disable-line:no-unused-expression
         return written;
     }
 

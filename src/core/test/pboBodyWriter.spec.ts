@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { PboBodyWriter } from '../pboBodyWriter';
-import { LzhCompressor } from '../lzhCompressor';
+import { LzhCompressor } from '../lzh/lzhCompressor';
 import { Header } from '../../domain/header';
 import { HeaderEntry } from '../../domain/headerEntry';
 import { PackingMethod } from '../../domain/packingMethod';
@@ -68,13 +68,16 @@ describe('core/pboBodyWriter', () => {
             const buf = Buffer.allocUnsafe(10);
             const dict = { prop: 'dict' } as any;
 
-            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, dict);
+            const writer = new PboBodyWriter();
+            const written = writer._writeEntry(buf, entry, 2, dict);
 
             expect(written).to.equal(1);
             expect(entry.dataSize).to.equal(1);
 
             expect(stubUncompressed.callCount).to.equal(1);
             expect(stubCompressed.callCount).to.equal(0);
+
+            expect(stubUncompressed.thisValues[0]).to.equal(writer);
 
             const args = stubUncompressed.args[0];
             expect(args.length).to.equal(4);
@@ -94,13 +97,16 @@ describe('core/pboBodyWriter', () => {
             const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
             const buf = Buffer.allocUnsafe(10);
 
-            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, undefined);
+            const writer = new PboBodyWriter();
+            const written = writer._writeEntry(buf, entry, 2, undefined);
 
             expect(written).to.equal(1);
             expect(entry.dataSize).to.equal(1);
 
             expect(stubUncompressed.callCount).to.equal(1);
             expect(stubCompressed.callCount).to.equal(0);
+
+            expect(stubUncompressed.thisValues[0]).to.equal(writer);
 
             const args = stubUncompressed.args[0];
             expect(args.length).to.equal(4);
@@ -121,13 +127,16 @@ describe('core/pboBodyWriter', () => {
             const buf = Buffer.allocUnsafe(10);
             const dict = { isFull: false } as any;
 
-            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, dict);
+            const writer = new PboBodyWriter();
+            const written = writer._writeEntry(buf, entry, 2, dict);
 
             expect(written).to.equal(1);
             expect(entry.dataSize).to.equal(1);
 
             expect(stubUncompressed.callCount).to.equal(1);
             expect(stubCompressed.callCount).to.equal(0);
+
+            expect(stubUncompressed.thisValues[0]).to.equal(writer);
 
             const args = stubUncompressed.args[0];
             expect(args.length).to.equal(4);
@@ -148,13 +157,16 @@ describe('core/pboBodyWriter', () => {
             const buf = Buffer.allocUnsafe(10);
             const dict = { isFull: true } as any;
 
-            const written = new PboBodyWriter()._writeEntry(buf, entry, 2, dict);
+            const writer = new PboBodyWriter();
+            const written = writer._writeEntry(buf, entry, 2, dict);
 
             expect(written).to.equal(2);
             expect(entry.dataSize).to.equal(2);
 
             expect(stubUncompressed.callCount).to.equal(0);
             expect(stubCompressed.callCount).to.equal(1);
+
+            expect(stubCompressed.thisValues[0]).to.equal(writer);
 
             const args = stubCompressed.args[0];
             expect(args.length).to.equal(4);
@@ -180,8 +192,10 @@ describe('core/pboBodyWriter', () => {
             expect(buf).to.eql(expected);
 
             expect(dict.add.callCount).to.equal(1);
-            expect(dict.add.args[0].length).to.equal(1);
+            expect(dict.add.args[0].length).to.equal(3);
             expect(dict.add.args[0][0]).to.equal(entry.contents);
+            expect(dict.add.args[0][1]).to.equal(0);
+            expect(dict.add.args[0][2]).to.equal(entry.contents.length);
         });
 
         it('should not throw if called without a dict', () => {

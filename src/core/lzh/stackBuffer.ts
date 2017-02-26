@@ -4,24 +4,29 @@ export interface BufferIntersection {
     length: number;
 }
 
+export interface SequenceInspection {
+    sourceBytes: number;
+
+    sequenceBytes: number;
+}
+
 export class StackBuffer {
     static size = 0b0000111111111111;
 
     private _data = Buffer.allocUnsafe(StackBuffer.size);
     private _fullfilment = 0;
 
-    add(buffer: Buffer): void {
-        if (buffer.length >= StackBuffer.size) {
-            buffer.copy(this._data, 0, buffer.length - StackBuffer.size);
-            this._fullfilment = StackBuffer.size;
-        } else if (this._fullfilment + buffer.length > StackBuffer.size) {
-            const takeExisting = StackBuffer.size - buffer.length;
+    add(buffer: Buffer, offset: number, length: number): void {
+        if (length >= StackBuffer.size) {//replace the buffer contents
+            const sourceStart = offset + length - StackBuffer.size;
+            this._fullfilment = buffer.copy(this._data, 0, sourceStart, sourceStart + length);
+        } else if (this._fullfilment + length > StackBuffer.size) {//shift the buffer contents left until there is enough space for the new bunch of bytes
+            const takeExisting = StackBuffer.size - length;
             this._data.copyWithin(0, this._fullfilment - takeExisting, this._fullfilment);
-            buffer.copy(this._data, takeExisting, 0);
+            buffer.copy(this._data, takeExisting, offset, offset + length);
             this._fullfilment = StackBuffer.size;
-        } else {
-            buffer.copy(this._data, this._fullfilment, 0);
-            this._fullfilment += buffer.length;
+        } else {//add some bytes onto the free space of the buffer
+            this._fullfilment += buffer.copy(this._data, this._fullfilment, offset, offset + length);
         }
     }
 
@@ -65,5 +70,15 @@ export class StackBuffer {
     get isFull(): boolean {
         const isFull = this._fullfilment === StackBuffer.size;
         return isFull;
+    }
+
+    checkWhitespace(buffer: Buffer): number {
+        let count = 0;
+        buffer.every((e, c) => { count = c; return e === 0x20; });
+        return count;
+    }
+
+    checkSequence(buffer: Buffer): SequenceInspection {
+        return { sourceBytes: 0, sequenceBytes: 0 };
     }
 }
