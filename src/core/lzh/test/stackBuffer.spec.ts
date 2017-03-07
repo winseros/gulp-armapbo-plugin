@@ -2,25 +2,17 @@ import { expect } from 'chai';
 import { BufferIntersection, StackBuffer } from '../stackBuffer';
 
 describe('core/lzh/stackBuffer', () => {
-    let size: number;
-    beforeEach(() => {
-        size = StackBuffer.size;
-        StackBuffer.size = 10;
-    });
-
-    afterEach(() => {
-        StackBuffer.size = size;
-    });
 
     describe('add', () => {
-        it('should add a buffer exceeding the stackBuffer size', () => {
-            const data = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-            const buf = new StackBuffer();
-            buf.add(data, 0, data.length);
+        let size: number;
 
-            const index = buf.intersect(Buffer.from([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]));
-            expect(index).to.eql({ length: 10, position: 0 } as BufferIntersection);
-            expect(buf.isFull).to.equal(true);
+        beforeEach(() => {
+            size = StackBuffer.size;
+            StackBuffer.size = 10;
+        });
+
+        afterEach(() => {
+            StackBuffer.size = size;
         });
 
         it('should add a buffer longer than a space remaining', () => {
@@ -33,7 +25,7 @@ describe('core/lzh/stackBuffer', () => {
 
             const index = buf.intersect(Buffer.from([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]));
             expect(index).to.eql({ length: 10, position: 0 } as BufferIntersection);
-            expect(buf.isFull).to.equal(true);
+            expect(buf.fullfilment).to.equal(10);
         });
 
         it('should add a buffer not longer than a space remaining', () => {
@@ -46,7 +38,7 @@ describe('core/lzh/stackBuffer', () => {
 
             const index = buf.intersect(Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
             expect(index).to.eql({ length: 10, position: 0 } as BufferIntersection);
-            expect(buf.isFull).to.equal(true);
+            expect(buf.fullfilment).to.equal(10);
         });
     });
 
@@ -54,6 +46,12 @@ describe('core/lzh/stackBuffer', () => {
         it('should return a negative result if buffer is empty', () => {
             const buf = new StackBuffer();
             const index = buf.intersect(Buffer.allocUnsafe(0));
+            expect(index).to.eql({ length: 0, position: -1 } as BufferIntersection);
+        });
+
+        it('should return a negative result if stack is empty', () => {
+            const buf = new StackBuffer();
+            const index = buf.intersect(Buffer.allocUnsafe(10));
             expect(index).to.eql({ length: 0, position: -1 } as BufferIntersection);
         });
 

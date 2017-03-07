@@ -2,15 +2,13 @@ import { Header } from '../domain/header';
 import { HeaderEntry } from '../domain/headerEntry';
 import { PackingMethod } from '../domain/packingMethod';
 import { LzhCompressor } from './lzh/lzhCompressor';
-import { StackBuffer } from './lzh/stackBuffer';
 
 export class PboBodyWriter {
     private _lzhCompressor = new LzhCompressor();
 
     writeBody(buffer: Buffer, header: Header): number {
-        const dict = this._getCompressionDict(header);
         const size = header.entries.reduce((accumulated, entry) => {
-            const copied = this._writeEntry(buffer, entry, accumulated, dict);
+            const copied = this._writeEntry(buffer, entry, accumulated);
             const offset = accumulated + copied;
             return offset;
         }, 0);
@@ -18,27 +16,21 @@ export class PboBodyWriter {
         return size;
     }
 
-    _getCompressionDict(header: Header): StackBuffer | undefined {
-        const stackBuffer = header.packed ? new StackBuffer() : undefined;
-        return stackBuffer;
-    }
-
-    _writeEntry(buffer: Buffer, entry: HeaderEntry, offset: number, dict?: StackBuffer): number {
-        const impl = dict && dict.isFull && entry.packingMethod === PackingMethod.packed
+    _writeEntry(buffer: Buffer, entry: HeaderEntry, offset: number): number {
+        const impl = entry.packingMethod === PackingMethod.packed
             ? this._writeCompressed
             : this._writeUncompressed;
-        entry.dataSize = impl.call(this, buffer, entry, offset, dict!);
+        entry.dataSize = impl.call(this, buffer, entry, offset);
         return entry.dataSize;
     }
 
-    _writeUncompressed(buffer: Buffer, entry: HeaderEntry, offset: number, dict?: StackBuffer): number {
+    _writeUncompressed(buffer: Buffer, entry: HeaderEntry, offset: number): number {
         const written = entry.contents.copy(buffer, offset, 0, entry.contents.length);
-        dict && dict.add(entry.contents, 0, entry.contents.length);//tslint:disable-line:no-unused-expression
         return written;
     }
 
-    _writeCompressed(buffer: Buffer, entry: HeaderEntry, offset: number, dict: StackBuffer): number {
-        const written = this._lzhCompressor.writeCompressed(entry.contents, buffer, offset, dict);
+    _writeCompressed(buffer: Buffer, entry: HeaderEntry, offset: number): number {
+        const written = this._lzhCompressor.writeCompressed(entry.contents, buffer, offset);
         return written;
     }
 }

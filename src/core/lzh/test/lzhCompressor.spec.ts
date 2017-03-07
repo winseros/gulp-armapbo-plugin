@@ -33,12 +33,17 @@ describe('core/lzh/lzhCompressor', () => {
                 .onCall(1).returns(packet2)
                 .onCall(2).returns(packet3);
 
+            const stubWriteCrc = sandbox.stub(LzhCompressor.prototype, '_writeCrc');
+            stubWriteCrc.returns(100500);
+
             const source = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
             const target = Buffer.allocUnsafe(0);
-            const dict = { prop: 'dict' } as any;
 
-            const result = new LzhCompressor().writeCompressed(source, target, 10, dict);
-            expect(result).to.equal(15);
+            const dict = { prop: 'dict' } as any;
+            sandbox.stub(LzhCompressor.prototype, '_getCompressionDict').returns(dict);
+
+            const result = new LzhCompressor().writeCompressed(source, target, 10);
+            expect(result).to.equal(100490);
 
             expect(createPacket.callCount).to.equal(3);
             expect(packet1.compose.calledWith(source, 0, dict)).to.equal(true);
@@ -48,6 +53,8 @@ describe('core/lzh/lzhCompressor', () => {
             expect(packet1.flush.calledWith(target, 10)).to.equal(true);
             expect(packet2.flush.calledWith(target, 13)).to.equal(true);
             expect(packet3.flush.calledWith(target, 18)).to.equal(true);
+
+            expect(stubWriteCrc.withArgs(source, target, 25).callCount).to.equal(1);
         });
     });
 });
