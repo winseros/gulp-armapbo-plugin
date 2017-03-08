@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { LzhCompressor } from '../lzhCompressor';
+import { StackBuffer } from '../stackBuffer';
+import { LzhPacket } from '../lzhPacket';
 
 describe('core/lzh/lzhCompressor', () => {
     let sandbox: sinon.SinonSandbox;
@@ -55,6 +57,56 @@ describe('core/lzh/lzhCompressor', () => {
             expect(packet3.flush.calledWith(target, 18)).to.equal(true);
 
             expect(stubWriteCrc.withArgs(source, target, 25).callCount).to.equal(1);
+        });
+    });
+
+    describe('_writeCrc', () => {
+        it('should write crc at offset', () => {
+            const getCrc = sandbox.stub(LzhCompressor.prototype, '_getCrc');
+            getCrc.returns(0x01020304);
+
+            const source = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            const target = Buffer.alloc(6);
+            const crc = new LzhCompressor()._writeCrc(source, target, 1);
+
+            expect(crc).to.equal(5);
+            expect(getCrc.withArgs(source).callCount).to.equal(1);
+            expect(target).to.eql(Buffer.from([0x00, 0x04, 0x03, 0x02, 0x01, 0x00]));
+        });
+    });
+
+    describe('_getCrc', () => {
+        it('should return a summ of buffer elements', () => {
+            const buf = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            const crc = new LzhCompressor()._getCrc(buf);
+
+            expect(crc).to.equal(55);
+        });
+    });
+
+    describe('_getCompressionDict', () => {
+        it('should create a new compression dict', () => {
+            const compressor = new LzhCompressor();
+
+            const dict1 = compressor._getCompressionDict();
+            const dict2 = compressor._getCompressionDict();
+
+            expect(dict1).to.be.instanceOf(StackBuffer);
+            expect(dict2).to.be.instanceOf(StackBuffer);
+            expect(dict1).not.to.equal(dict2);
+        });
+    });
+
+    describe('_getPacket', () => {
+        it('should create a new packet', () => {
+            const compressor = new LzhCompressor();
+
+            const packet1 = compressor._getPacket();
+            const packet2 = compressor._getPacket();
+
+            expect(packet1).to.be.instanceOf(LzhPacket);
+            expect(packet2).to.be.instanceOf(LzhPacket);
+            expect(packet1).not.to.equal(packet2);
         });
     });
 });

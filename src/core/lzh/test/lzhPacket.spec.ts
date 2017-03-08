@@ -3,7 +3,7 @@ import * as sinon from 'sinon';
 import { LzhPacket } from '../lzhPacket';
 import { BufferIntersection, SequenceInspection, StackBuffer } from '../stackBuffer';
 
-describe.skip('core/lzh/lzhPacket', () => {
+describe('core/lzh/lzhPacket', () => {
     let sandbox: sinon.SinonSandbox;
 
     beforeEach(() => {
@@ -37,14 +37,14 @@ describe.skip('core/lzh/lzhPacket', () => {
             expect(spyUncompressed.callCount).to.equal(0);
             expect(stubCompressed.callCount).to.equal(8);
 
-            expect(stubCompressed.withArgs(1, 18, source, 10, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(2, 18, source, 11, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(3, 18, source, 14, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(4, 18, source, 19, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(5, 18, source, 26, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(6, 18, source, 35, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(7, 18, source, 46, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(8, 18, source, 59, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(0, 18, source, 10, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(1, 18, source, 11, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(2, 18, source, 14, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(3, 18, source, 19, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(4, 18, source, 26, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(5, 18, source, 35, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(6, 18, source, 46, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(7, 18, source, 59, dict).callCount).to.equal(1);
         });
 
         it('should fill the packet until the source has data', () => {
@@ -65,11 +65,11 @@ describe.skip('core/lzh/lzhPacket', () => {
             expect(stubUncompressed.callCount).to.equal(1);
             expect(stubCompressed.callCount).to.equal(3);
 
-            expect(stubCompressed.withArgs(1, 10, source, 90, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(2, 9, source, 91, dict).callCount).to.equal(1);
-            expect(stubCompressed.withArgs(3, 6, source, 94, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(0, 10, source, 90, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(1, 9, source, 91, dict).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(2, 6, source, 94, dict).callCount).to.equal(1);
 
-            expect(stubUncompressed.withArgs(4, source, 99, dict).callCount).to.equal(1);
+            expect(stubUncompressed.withArgs(3, source, 99, dict).callCount).to.equal(1);
         });
     });
 
@@ -79,7 +79,7 @@ describe.skip('core/lzh/lzhPacket', () => {
             const dict = { add: sandbox.spy() } as any;
 
             const packet = new LzhPacket();
-            const processed = packet._composeUncompressed(1, source, 3, dict);
+            const processed = packet._composeUncompressed(7, source, 3, dict);
 
             expect(processed).to.equal(1);
             expect(dict.add.withArgs(source, 3, 1).callCount).to.equal(1);
@@ -126,7 +126,8 @@ describe.skip('core/lzh/lzhPacket', () => {
                 add: sandbox.spy(),
                 intersect: sandbox.stub(),
                 checkWhitespace: sandbox.stub(),
-                checkSequence: sandbox.stub()
+                checkSequence: sandbox.stub(),
+                fullfilment: 11
             } as any;
 
             const intersection = { length: 11, position: 1 } as BufferIntersection;
@@ -144,7 +145,7 @@ describe.skip('core/lzh/lzhPacket', () => {
 
             expect(processed).to.equal(intersection.length);
             expect(spyUncompressed.callCount).to.equal(0);
-            expect(stubComposePointer.withArgs(StackBuffer.size - intersection.position, intersection.length).callCount).to.equal(1);
+            expect(stubComposePointer.withArgs(dict.fullfilment - intersection.position, intersection.length).callCount).to.equal(1);
             expect(dict.add.withArgs(source, offset, intersection.length).callCount).to.equal(1);
 
             const target = Buffer.alloc(4);
@@ -169,20 +170,48 @@ describe.skip('core/lzh/lzhPacket', () => {
             const spyUncompressed = sandbox.spy(LzhPacket.prototype, '_composeUncompressed');
             const stubComposePointer = sandbox.stub(LzhPacket.prototype, '_composePointer').returns(0b1010101001010101);
 
-            const offset = 5;
+            const offset = 5;//less than max size
             const source = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
             const packet = new LzhPacket();
             const processed = packet._composeCompressed(1, 3, source, offset, dict);
 
             expect(processed).to.equal(whitespaces);
             expect(spyUncompressed.callCount).to.equal(0);
-            expect(stubComposePointer.withArgs(-whitespaces - 1, whitespaces).callCount).to.equal(1);
+            expect(stubComposePointer.withArgs(offset + whitespaces, whitespaces).callCount).to.equal(1);
             expect(dict.add.withArgs(source, offset, whitespaces).callCount).to.equal(1);
 
             const target = Buffer.alloc(4);
             const written = packet.flush(target, 0);
             expect(written).to.equal(3);
             expect(target).to.eql(Buffer.from([0, 0b01010101, 0b10101010, 0]));
+        });
+
+        it('should not pack uning whitespaces if offset is greater than stackbuffer size', () => {
+            const dict = {
+                add: sandbox.spy(),
+                intersect: sandbox.stub(),
+                checkWhitespace: sandbox.spy(),
+                checkSequence: sandbox.stub(),
+                fullfilment: 11
+            } as any;
+
+            const intersection = { length: 11, position: 1 } as BufferIntersection;
+            dict.intersect.returns(intersection);
+            dict.checkSequence.returns({ sourceBytes: 2, sequenceBytes: 0 } as SequenceInspection);
+
+            sandbox.spy(LzhPacket.prototype, '_composeUncompressed');
+            const stubComposePointer = sandbox.stub(LzhPacket.prototype, '_composePointer').returns(0b1010101001010101);
+
+            const offset = LzhPacket.maxOffsetToUseWhitespaces;//equal to max size;
+            const source = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            const packet = new LzhPacket();
+            const processed = packet._composeCompressed(1, 3, source, offset, dict);
+
+            expect(processed).to.equal(intersection.length);
+            expect(stubComposePointer.withArgs(dict.fullfilment - intersection.position, intersection.length).callCount).to.equal(1);
+            expect(dict.add.withArgs(source, offset, intersection.length).callCount).to.equal(1);
+
+            expect(dict.checkWhitespace.callCount).to.equal(0);
         });
 
         it('should pack uning sequence', () => {

@@ -91,4 +91,24 @@ describe('core/lzh/stackBuffer', () => {
             expect(index).to.eql({ length: 3, position: 5 } as BufferIntersection);
         });
     });
+
+    describe('checkWhitespace', () => {
+        it('should return 0 if buffer starts from a non-whitespace', () => {
+            const buf = new StackBuffer();
+            const count = buf.checkWhitespace(Buffer.from([0x10]));
+            expect(count).to.eql(0);
+        });
+
+        it('should return a count of sequantial whitespaces', () => {
+            const buf = new StackBuffer();
+            const count = buf.checkWhitespace(Buffer.from([0x20, 0x20, 0x20, 0x20, 0x20]));
+            expect(count).to.eql(5);
+        });
+
+        it('should return a count of sequantial whitespaces ending with a non-whitespace', () => {
+            const buf = new StackBuffer();
+            const count = buf.checkWhitespace(Buffer.from([0x20, 0x20, 0x20, 0x20, 0x20, 0x00]));
+            expect(count).to.eql(5);
+        });
+    });
 });
