@@ -23,7 +23,7 @@ describe('core/pboFormatter', () => {
             entry1.contents = contents1;
             entry2.contents = contents2;
 
-            const buffer = new PboFormatter().format(new Header([extension1, extension2], [entry1, entry2]));
+            const buffer = new PboFormatter().format(new Header([extension1, extension2], [entry1, entry2]), {});
 
             const expected = new Buffer([0, 115, 114, 101, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//signature
                 102, 105, 114, 115, 116, 45, 101, 120, 116, 101, 110, 115, 105, 111, 110, 45, 110, 97, 109, 101, 0, 102, 105, 114, 115, 116, 45, 101, 120, 116, 101, 110, 115, 105, 111, 110, 45, 118, 97, 108, 117, 101, 0,//ext1

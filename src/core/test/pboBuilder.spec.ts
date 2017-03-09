@@ -42,6 +42,8 @@ describe('core/pboBuilder', () => {
 
             //header
             expect(stubFormat.callCount).to.equal(1);
+            expect(stubFormat.args[0][1]).to.equal(options);
+
             const header = stubFormat.args[0][0] as Header;
             expect(header).to.be.instanceof(Header);
 

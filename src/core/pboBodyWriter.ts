@@ -2,9 +2,16 @@ import { Header } from '../domain/header';
 import { HeaderEntry } from '../domain/headerEntry';
 import { PackingMethod } from '../domain/packingMethod';
 import { LzhCompressor } from './lzh/lzhCompressor';
+import { CompressionReporter } from './lzh/compressionReporter';
+import { StreamOptions } from './streamOptions';
 
 export class PboBodyWriter {
-    private _lzhCompressor = new LzhCompressor();
+    private readonly _lzhCompressor = new LzhCompressor();
+    private readonly _reporter: CompressionReporter;
+
+    constructor(options: StreamOptions) {
+        this._reporter = new CompressionReporter(options);
+    }
 
     writeBody(buffer: Buffer, header: Header): number {
         const size = header.entries.reduce((accumulated, entry) => {
@@ -31,6 +38,7 @@ export class PboBodyWriter {
 
     _writeCompressed(buffer: Buffer, entry: HeaderEntry, offset: number): number {
         const written = this._lzhCompressor.writeCompressed(entry.contents, buffer, offset);
+        this._reporter.report(entry.name, entry.originalSize, written);
         return written;
     }
 }

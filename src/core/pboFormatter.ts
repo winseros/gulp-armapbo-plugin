@@ -3,12 +3,13 @@ import { BufferAllocator } from './bufferAllocator';
 import { PboBodyWriter } from './pboBodyWriter';
 import { PboHeaderWriter } from './pboHeaderWriter';
 import { PboChecksumWriter } from './pboChecksumWriter';
+import { StreamOptions } from './streamOptions';
 
 export class PboFormatter {
-    format(header: Header): Buffer {
+    format(header: Header, options: StreamOptions): Buffer {
         const buf = new BufferAllocator().allocateBuffers(header);
 
-        const bodySize = new PboBodyWriter().writeBody(buf.body, header);
+        const bodySize = new PboBodyWriter(options).writeBody(buf.body, header);
         new PboHeaderWriter().writeHeader(buf.header, header);
 
         const contents = Buffer.from(buf.raw, 0, buf.header.length + bodySize);

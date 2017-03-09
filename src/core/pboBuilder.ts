@@ -33,7 +33,7 @@ export class PboBuilder {
         });
 
         const header = new Header(extensions, entries);
-        const buf = new PboFormatter().format(header);
+        const buf = new PboFormatter().format(header, options);
         return buf;
     }
 

@@ -5,6 +5,7 @@ import { LzhCompressor } from '../lzh/lzhCompressor';
 import { Header } from '../../domain/header';
 import { HeaderEntry } from '../../domain/headerEntry';
 import { PackingMethod } from '../../domain/packingMethod';
+import { CompressionReporter } from '../lzh/compressionReporter';
 
 describe('core/pboBodyWriter', () => {
 
@@ -29,7 +30,7 @@ describe('core/pboBodyWriter', () => {
                 .onSecondCall().returns(entry2.contents.length);
 
             const buf = Buffer.allocUnsafe(entry1.contents.length + entry2.contents.length);
-            const written = new PboBodyWriter().writeBody(buf, header);
+            const written = new PboBodyWriter({}).writeBody(buf, header);
 
             expect(written).to.equal(entry1.contents.length + entry2.contents.length);
 
@@ -50,7 +51,7 @@ describe('core/pboBodyWriter', () => {
             const entry = new HeaderEntry('', PackingMethod.uncompressed, 0, 0);
             const buf = Buffer.allocUnsafe(10);
 
-            const writer = new PboBodyWriter();
+            const writer = new PboBodyWriter({});
             const written = writer._writeEntry(buf, entry, 2);
 
             expect(written).to.equal(1);
@@ -73,7 +74,7 @@ describe('core/pboBodyWriter', () => {
             const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
             const buf = Buffer.allocUnsafe(10);
 
-            const writer = new PboBodyWriter();
+            const writer = new PboBodyWriter({});
             const written = writer._writeEntry(buf, entry, 2);
 
             expect(written).to.equal(2);
@@ -93,7 +94,7 @@ describe('core/pboBodyWriter', () => {
             entry.contents = Buffer.from([0x01, 0x02, 0x03]);
 
             const buf = Buffer.alloc(10);
-            const written = new PboBodyWriter()._writeUncompressed(buf, entry, 3);
+            const written = new PboBodyWriter({})._writeUncompressed(buf, entry, 3);
 
             expect(written).to.equal(3);
 
@@ -106,21 +107,24 @@ describe('core/pboBodyWriter', () => {
         it('should write compressed data to buffer', () => {
             const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
+            const stubReport = sandbox.stub(CompressionReporter.prototype, 'report');
 
             stubCompressed.returns(1);
             stubUncompressed.returns(2);
 
-            const entry = new HeaderEntry('', PackingMethod.packed, 0, 0);
+            const entry = new HeaderEntry('some-entry-name', PackingMethod.packed, 100501, 0);
             entry.contents = Buffer.allocUnsafe(5);
 
             const buf = Buffer.allocUnsafe(10);
-            const written = new PboBodyWriter()._writeCompressed(buf, entry, 100500);
+            const written = new PboBodyWriter({})._writeCompressed(buf, entry, 100500);
 
             expect(written).to.equal(1);
 
             expect(stubUncompressed.callCount).to.equal(0);
             expect(stubCompressed.callCount).to.equal(1);
             expect(stubCompressed.withArgs(entry.contents, buf, 100500).callCount).to.equal(1);
+
+            expect(stubReport.withArgs('some-entry-name', 100501, 1).callCount).to.equal(1);
         });
     });
 });
