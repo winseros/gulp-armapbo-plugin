@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { LzhPacket } from '../lzhPacket';
-import { BufferIntersection, SequenceInspection, StackBuffer } from '../stackBuffer';
+import { BufferIntersection, SequenceInspection } from '../stackBuffer';
 
 describe('core/lzh/lzhPacket', () => {
     let sandbox: sinon.SinonSandbox;
@@ -214,7 +214,7 @@ describe('core/lzh/lzhPacket', () => {
             expect(dict.checkWhitespace.callCount).to.equal(0);
         });
 
-        it('should pack uning sequence', () => {
+        it('should pack using sequence', () => {
             const dict = {
                 add: sandbox.spy(),
                 intersect: sandbox.stub(),
@@ -237,7 +237,7 @@ describe('core/lzh/lzhPacket', () => {
 
             expect(processed).to.equal(sequence.sourceBytes);
             expect(spyUncompressed.callCount).to.equal(0);
-            expect(stubComposePointer.withArgs(StackBuffer.size - sequence.sequenceBytes, sequence.sourceBytes).callCount).to.equal(1);
+            expect(stubComposePointer.withArgs(sequence.sequenceBytes, sequence.sourceBytes).callCount).to.equal(1);
             expect(dict.add.withArgs(source, offset, sequence.sourceBytes).callCount).to.equal(1);
 
             const target = Buffer.alloc(4);

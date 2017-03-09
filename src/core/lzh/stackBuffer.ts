@@ -83,6 +83,28 @@ export class StackBuffer {
     }
 
     checkSequence(buffer: Buffer): SequenceInspection {
-        return { sourceBytes: 0, sequenceBytes: 0 };
+        let result = { sourceBytes: 0, sequenceBytes: 0 };
+        const maxSourceBytes = Math.max(this._fullfilment, buffer.length);
+        for (let i = 1; i < maxSourceBytes; i++) {
+            const sequence = this._checkSequence(buffer, i);
+            if (sequence.sourceBytes > result.sourceBytes) {
+                result = sequence;
+            }
+        }
+        return result;
+    }
+
+    _checkSequence(buffer: Buffer, sequenceBytes: number): SequenceInspection {
+        const result = { sequenceBytes, sourceBytes: 0 };
+        while (result.sourceBytes < buffer.length) {
+            for (let i = this._fullfilment - sequenceBytes; i < this._fullfilment && result.sourceBytes < buffer.length; i++) {
+                if (buffer[result.sourceBytes] === this._data[i]) {
+                    result.sourceBytes++;
+                } else {
+                    return result;
+                }
+            }
+        }
+        return result;
     }
 }

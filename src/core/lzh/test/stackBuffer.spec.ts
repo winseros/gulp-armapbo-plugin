@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BufferIntersection, StackBuffer } from '../stackBuffer';
+import { SequenceInspection, BufferIntersection, StackBuffer } from '../stackBuffer';
 
 describe('core/lzh/stackBuffer', () => {
 
@@ -109,6 +109,35 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             const count = buf.checkWhitespace(Buffer.from([0x20, 0x20, 0x20, 0x20, 0x20, 0x00]));
             expect(count).to.eql(5);
+        });
+    });
+
+    describe('checkSequence', () => {
+        it('should return a valid result if there is no match at all', () => {
+            const buf = new StackBuffer();
+            buf.add(Buffer.from([0x00, 0x01, 0x02, 0x03]), 0, 4);
+
+            const match = buf.checkSequence(Buffer.from([0x05, 0x06, 0x07]));
+
+            expect(match).to.eql({ sequenceBytes: 0, sourceBytes: 0 } as SequenceInspection);
+        });
+
+        it('should return a valid result if there is a regular intersection', () => {
+            const buf = new StackBuffer();
+            buf.add(Buffer.from([0x00, 0x01, 0x02, 0x03]), 0, 4);
+
+            const match = buf.checkSequence(Buffer.from([0x02, 0x03, 0x04]));
+
+            expect(match).to.eql({ sequenceBytes: 2, sourceBytes: 2 } as SequenceInspection);
+        });
+
+        it('should return a valid result if there is a sequence intersection', () => {
+            const buf = new StackBuffer();
+            buf.add(Buffer.from([0x00, 0x01, 0x02, 0x03]), 0, 4);
+
+            const match = buf.checkSequence(Buffer.from([0x02, 0x03, 0x02, 0x03, 0x02, 0x03, 0x02]));
+
+            expect(match).to.eql({ sequenceBytes: 2, sourceBytes: 7 } as SequenceInspection);
         });
     });
 });

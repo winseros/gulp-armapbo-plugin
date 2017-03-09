@@ -55,7 +55,7 @@ export class LzhPacket {
                 pointer = this._composePointer(offset + whitespace, whitespace);
                 processed = whitespace;
             } else {
-                pointer = this._composePointer(StackBuffer.size - sequence.sequenceBytes, sequence.sourceBytes);
+                pointer = this._composePointer(sequence.sequenceBytes, sequence.sourceBytes);
                 processed = sequence.sourceBytes;
             }
             dict.add(buffer, offset, processed);
