@@ -1,4 +1,4 @@
-import { PboTransformStream } from './core/pboTransformStream2';
+import { PboTransformStream } from './core/pboTransformStream';
 import { StreamOptions } from './core/streamOptions';
 
 export = (options?: StreamOptions): PboTransformStream => {

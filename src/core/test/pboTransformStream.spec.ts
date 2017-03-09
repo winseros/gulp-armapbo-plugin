@@ -1,5 +1,5 @@
-import { PboTransformStream } from '../pboTransformStream2';
-import { PboBuilder } from '../pboBuilder2';
+import { PboTransformStream } from '../pboTransformStream';
+import { PboBuilder } from '../pboBuilder';
 import { StreamOptions } from '../streamOptions';
 import { Readable, Writable, Duplex } from 'stream';
 import { expect } from 'chai';

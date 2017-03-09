@@ -1,4 +1,4 @@
-import { PboBuilder } from '../pboBuilder2';
+import { PboBuilder } from '../pboBuilder';
 import { PboFormatter } from '../pboFormatter';
 import { StreamOptions } from '../streamOptions';
 import { Header } from '../../domain/header';

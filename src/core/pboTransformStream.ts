@@ -1,13 +1,9 @@
-/*import { Transform } from 'stream';
-import { PboHeaderExtension } from '../domain/pboHeaderExtension';
+import { Transform } from 'stream';
 import { PboBuilder } from './pboBuilder';
 import { StreamOptions } from './streamOptions';
 import * as path from 'path';
 import * as File from 'vinyl';
 
-export interface StreamCallback {
-    (err?: Error, result?: File): void;
-}
 export class PboTransformStream extends Transform {
     private _contentParts: File[] = [];
     private _options: StreamOptions;
@@ -19,7 +15,7 @@ export class PboTransformStream extends Transform {
         this._options = options || {} as StreamOptions;
     }
 
-    _transform(file: File, enc: string, cb: StreamCallback): void {
+    _transform(file: File, enc: string, cb: Function): void {
         if (file.isStream()) {
             cb(new Error('Streaming input is not supported'));
             return;
@@ -29,11 +25,7 @@ export class PboTransformStream extends Transform {
     }
 
     _flush(cb: Function): void {
-        const extensions = this._options.extensions && Array.isArray(this._options.extensions)
-            ? this._options.extensions.map(ext => new PboHeaderExtension(ext.name, ext.value))
-            : [];
-
-        const data = this._builder.build(this._contentParts, extensions);
+        const data = this._builder.build(this._contentParts, this._options);
 
         const fileName = this._options.fileName || this._getDefaultName();
         const result = new File({ path: fileName, contents: data });
@@ -49,4 +41,3 @@ export class PboTransformStream extends Transform {
         return name;
     }
 }
-*/
