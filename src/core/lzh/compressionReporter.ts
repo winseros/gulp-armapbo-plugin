@@ -9,7 +9,15 @@ export class CompressionReporter {
         this._normalizeOptions();
     }
 
-    report(name: string, originalSize: number, compressedSize: number): void {
+    reportOverall(uncompressedSize: number, compressedSize: number): void {
+        if (this._options.verbose) {
+            const percentage = this._getStyledPercentage(uncompressedSize, compressedSize);
+            const text = `Overall compression: ${percentage}`;
+            this._writeMessage(text);
+        }
+    }
+
+    reportFile(name: string, originalSize: number, compressedSize: number): void {
         if (this._options.verbose) {
             const percentage = this._getStyledPercentage(originalSize, compressedSize);
             const text = `Compression: ${percentage} | ${name}`;
@@ -22,7 +30,7 @@ export class CompressionReporter {
     }
 
     _getStyledPercentage(originalSize: number, compressedSize: number): string {
-        const percentage = Math.floor((1 - compressedSize / originalSize) * 100);
+        const percentage = Math.round((1 - compressedSize / originalSize) * 100);
         const style = this._getPercentageStyle(percentage);
         const formatted = percentage < 10 ? `0${percentage}` : percentage;
         const text = style(`${formatted}%`);

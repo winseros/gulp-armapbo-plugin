@@ -43,7 +43,7 @@ export class PboBodyWriter {
             entry.__fallbackToUncompressed();
         }
         else {
-            this._reporter.report(entry.name, entry.originalSize, written);
+            this._reporter.reportFile(entry.name, entry.originalSize, written);
         }
         return written;
     }

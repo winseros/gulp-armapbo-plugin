@@ -107,7 +107,7 @@ describe('core/pboBodyWriter', () => {
         it('should write compressed data to buffer', () => {
             const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
-            const stubReport = sandbox.stub(CompressionReporter.prototype, 'report');
+            const stubReport = sandbox.stub(CompressionReporter.prototype, 'reportFile');
 
             stubCompressed.returns(1);
             stubUncompressed.returns(2);
@@ -130,7 +130,7 @@ describe('core/pboBodyWriter', () => {
         it('should fall back to uncompressed if compressed size is greater than original', () => {
             const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
-            const stubReport = sandbox.stub(CompressionReporter.prototype, 'report');
+            const stubReport = sandbox.stub(CompressionReporter.prototype, 'reportFile');
 
             stubCompressed.returns(100502);
             stubUncompressed.returns(2);

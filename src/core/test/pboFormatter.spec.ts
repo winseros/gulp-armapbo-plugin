@@ -3,9 +3,21 @@ import { PackingMethod } from '../../domain/packingMethod';
 import { HeaderExtension } from '../../domain/headerExtension';
 import { HeaderEntry } from '../../domain/headerEntry';
 import { Header } from '../../domain/header';
+import { CompressionReporter } from '../lzh/compressionReporter';
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 describe('core/pboFormatter', () => {
+    let sandbox: sinon.SinonSandbox;
+
+    beforeEach(() => {
+        sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+        sandbox.restore();
+    });
+
     describe('build', () => {
         it('should build an uncompressed pbo', () => {
             const timestamp1 = new Date('2014-05-15T00:00:00+0300').getTime() / 1000;
@@ -23,6 +35,8 @@ describe('core/pboFormatter', () => {
             entry1.contents = contents1;
             entry2.contents = contents2;
 
+            const stubReport = sandbox.stub(CompressionReporter.prototype, 'reportOverall');
+
             const buffer = new PboFormatter().format(new Header([extension1, extension2], [entry1, entry2]), {});
 
             const expected = new Buffer([0, 115, 114, 101, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,//signature
@@ -38,6 +52,7 @@ describe('core/pboFormatter', () => {
                 74, 246, 111, 61, 67, 189, 91, 87, 60, 204, 73, 38, 246, 189, 139, 211, 147, 222, 140, 238]);//checksum
 
             expect(buffer).to.eql(expected);
+            expect(stubReport.withArgs(expected.length, expected.length).callCount).to.equal(1);
         });
     });
 });
