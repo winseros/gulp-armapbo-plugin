@@ -788,20 +788,6 @@
       "resolved": "https://registry.npmjs.org/create-error-class/-/create-error-class-3.0.2.tgz",
       "dev": true
     },
-    "cross-spawn": {
-      "version": "5.1.0",
-      "from": "cross-spawn@>=5.0.1 <6.0.0",
-      "resolved": "https://registry.npmjs.org/cross-spawn/-/cross-spawn-5.1.0.tgz",
-      "dev": true,
-      "dependencies": {
-        "lru-cache": {
-          "version": "4.0.2",
-          "from": "lru-cache@>=4.0.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lru-cache/-/lru-cache-4.0.2.tgz",
-          "dev": true
-        }
-      }
-    },
     "cross-spawn-async": {
       "version": "2.2.5",
       "from": "cross-spawn-async@>=2.1.1 <3.0.0",
@@ -846,12 +832,6 @@
       "version": "0.4.1",
       "from": "currently-unhandled@>=0.4.1 <0.5.0",
       "resolved": "https://registry.npmjs.org/currently-unhandled/-/currently-unhandled-0.4.1.tgz",
-      "dev": true
-    },
-    "dargs": {
-      "version": "5.1.0",
-      "from": "dargs@>=5.1.0 <6.0.0",
-      "resolved": "https://registry.npmjs.org/dargs/-/dargs-5.1.0.tgz",
       "dev": true
     },
     "dashdash": {
@@ -1095,12 +1075,6 @@
       "version": "2.0.2",
       "from": "esutils@>=2.0.2 <3.0.0",
       "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
-      "dev": true
-    },
-    "execa": {
-      "version": "0.6.0",
-      "from": "execa@>=0.6.0 <0.7.0",
-      "resolved": "https://registry.npmjs.org/execa/-/execa-0.6.0.tgz",
       "dev": true
     },
     "exit-hook": {
@@ -1678,9 +1652,9 @@
       "dev": true
     },
     "gulp-mocha": {
-      "version": "4.1.0",
-      "from": "gulp-mocha@latest",
-      "resolved": "https://registry.npmjs.org/gulp-mocha/-/gulp-mocha-4.1.0.tgz",
+      "version": "3.0.1",
+      "from": "gulp-mocha@3.0.1",
+      "resolved": "https://registry.npmjs.org/gulp-mocha/-/gulp-mocha-3.0.1.tgz",
       "dev": true
     },
     "gulp-sourcemaps": {
@@ -1871,6 +1845,12 @@
       "version": "2.2.2",
       "from": "invariant@>=2.2.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/invariant/-/invariant-2.2.2.tgz",
+      "dev": true
+    },
+    "irregular-plurals": {
+      "version": "1.2.0",
+      "from": "irregular-plurals@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/irregular-plurals/-/irregular-plurals-1.2.0.tgz",
       "dev": true
     },
     "is-absolute": {
@@ -2736,12 +2716,6 @@
       "resolved": "https://registry.npmjs.org/normalize-path/-/normalize-path-2.0.1.tgz",
       "dev": true
     },
-    "npm-run-path": {
-      "version": "2.0.2",
-      "from": "npm-run-path@>=2.0.2 <3.0.0",
-      "resolved": "https://registry.npmjs.org/npm-run-path/-/npm-run-path-2.0.2.tgz",
-      "dev": true
-    },
     "number-is-nan": {
       "version": "1.0.1",
       "from": "number-is-nan@>=1.0.0 <2.0.0",
@@ -2848,12 +2822,6 @@
       "resolved": "https://registry.npmjs.org/osenv/-/osenv-0.1.4.tgz",
       "dev": true
     },
-    "p-finally": {
-      "version": "1.0.0",
-      "from": "p-finally@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/p-finally/-/p-finally-1.0.0.tgz",
-      "dev": true
-    },
     "package-json": {
       "version": "2.4.0",
       "from": "package-json@>=2.0.0 <3.0.0",
@@ -2922,12 +2890,6 @@
       "resolved": "https://registry.npmjs.org/path-is-inside/-/path-is-inside-1.0.2.tgz",
       "dev": true
     },
-    "path-key": {
-      "version": "2.0.1",
-      "from": "path-key@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/path-key/-/path-key-2.0.1.tgz",
-      "dev": true
-    },
     "path-root": {
       "version": "0.1.1",
       "from": "path-root@>=0.1.1 <0.2.0",
@@ -2962,6 +2924,12 @@
       "version": "2.0.1",
       "from": "pinkie-promise@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/pinkie-promise/-/pinkie-promise-2.0.1.tgz",
+      "dev": true
+    },
+    "plur": {
+      "version": "2.1.2",
+      "from": "plur@>=2.1.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/plur/-/plur-2.1.2.tgz",
       "dev": true
     },
     "popsicle": {
@@ -3243,6 +3211,18 @@
       "resolved": "https://registry.npmjs.org/replace-ext/-/replace-ext-0.0.1.tgz",
       "dev": true
     },
+    "req-cwd": {
+      "version": "1.0.1",
+      "from": "req-cwd@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/req-cwd/-/req-cwd-1.0.1.tgz",
+      "dev": true
+    },
+    "req-from": {
+      "version": "1.0.1",
+      "from": "req-from@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/req-from/-/req-from-1.0.1.tgz",
+      "dev": true
+    },
     "request": {
       "version": "2.79.0",
       "from": "request@2.79.0",
@@ -3259,6 +3239,12 @@
       "version": "0.1.1",
       "from": "resolve-dir@>=0.1.0 <0.2.0",
       "resolved": "https://registry.npmjs.org/resolve-dir/-/resolve-dir-0.1.1.tgz",
+      "dev": true
+    },
+    "resolve-from": {
+      "version": "2.0.0",
+      "from": "resolve-from@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/resolve-from/-/resolve-from-2.0.0.tgz",
       "dev": true
     },
     "resolve-url": {
@@ -3314,18 +3300,6 @@
       "version": "0.0.7",
       "from": "sequencify@>=0.0.7 <0.1.0",
       "resolved": "https://registry.npmjs.org/sequencify/-/sequencify-0.0.7.tgz",
-      "dev": true
-    },
-    "shebang-command": {
-      "version": "1.2.0",
-      "from": "shebang-command@>=1.2.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/shebang-command/-/shebang-command-1.2.0.tgz",
-      "dev": true
-    },
-    "shebang-regex": {
-      "version": "1.0.0",
-      "from": "shebang-regex@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/shebang-regex/-/shebang-regex-1.0.0.tgz",
       "dev": true
     },
     "sigmund": {
@@ -3526,6 +3500,12 @@
       "version": "2.0.0",
       "from": "supports-color@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-2.0.0.tgz"
+    },
+    "temp": {
+      "version": "0.8.3",
+      "from": "temp@>=0.8.3 <0.9.0",
+      "resolved": "https://registry.npmjs.org/temp/-/temp-0.8.3.tgz",
+      "dev": true
     },
     "term-size": {
       "version": "0.1.1",
