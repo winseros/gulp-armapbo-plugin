@@ -37,8 +37,14 @@ export class PboBodyWriter {
     }
 
     _writeCompressed(buffer: Buffer, entry: HeaderEntry, offset: number): number {
-        const written = this._lzhCompressor.writeCompressed(entry.contents, buffer, offset);
-        this._reporter.report(entry.name, entry.originalSize, written);
+        let written = this._lzhCompressor.writeCompressed(entry.contents, buffer, offset);
+        if (written >= entry.originalSize) {
+            written = this._writeUncompressed(buffer, entry, offset);
+            entry.__fallbackToUncompressed();
+        }
+        else {
+            this._reporter.report(entry.name, entry.originalSize, written);
+        }
         return written;
     }
 }

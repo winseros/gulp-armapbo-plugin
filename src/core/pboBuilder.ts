@@ -41,12 +41,12 @@ export class PboBuilder {
         const compress = options.compress;
         switch (true) {
             case (typeof compress === 'string'): {
-                return (f: File) => minimatch(f.relative, compress as string) ? PackingMethod.packed : PackingMethod.uncompressed;
+                return (f: File) => (f.contents as Buffer).length && minimatch(f.relative, compress as string) ? PackingMethod.packed : PackingMethod.uncompressed;
             }
             case (Array.isArray(compress)): {
                 const patterns = (compress as string[]).filter(s => !!(typeof s === 'string' && s.trim()));
                 const func = patterns.length
-                    ? (f: File) => patterns.some(p => minimatch(f.relative, p)) ? PackingMethod.packed : PackingMethod.uncompressed
+                    ? (f: File) => (f.contents as Buffer).length && patterns.some(p => minimatch(f.relative, p)) ? PackingMethod.packed : PackingMethod.uncompressed
                     : () => PackingMethod.uncompressed;
                 return func;
             }

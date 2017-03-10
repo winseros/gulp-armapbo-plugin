@@ -126,5 +126,29 @@ describe('core/pboBodyWriter', () => {
 
             expect(stubReport.withArgs('some-entry-name', 100501, 1).callCount).to.equal(1);
         });
+
+        it('should fall back to uncompressed if compressed size is greater than original', () => {
+            const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
+            const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
+            const stubReport = sandbox.stub(CompressionReporter.prototype, 'report');
+
+            stubCompressed.returns(100502);
+            stubUncompressed.returns(2);
+
+            const entry = new HeaderEntry('some-entry-name', PackingMethod.packed, 100501, 0);
+            entry.contents = Buffer.allocUnsafe(5);
+
+            const buf = Buffer.allocUnsafe(10);
+            const written = new PboBodyWriter({})._writeCompressed(buf, entry, 100500);
+
+            expect(written).to.equal(2);
+            expect(entry.packingMethod).to.equal(PackingMethod.uncompressed);
+
+            expect(stubUncompressed.withArgs(buf, entry, 100500).callCount).to.equal(1);
+            expect(stubCompressed.callCount).to.equal(1);
+            expect(stubCompressed.withArgs(entry.contents, buf, 100500).callCount).to.equal(1);
+
+            expect(stubReport.callCount).to.equal(0);
+        });
     });
 });

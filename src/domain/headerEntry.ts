@@ -11,18 +11,22 @@ export class HeaderEntry {
         return new HeaderEntry('', PackingMethod.uncompressed, 0, 0);
     }
 
+    private _packingMethod: PackingMethod;
+
     constructor(name: string, packingMethod: PackingMethod, originalSize: number, timestamp: number) {
         Assert.isNotNull(name, 'name');
 
         this.name = name;
-        this.packingMethod = packingMethod;
+        this._packingMethod = packingMethod;
         this.originalSize = originalSize;
         this.timestamp = timestamp;
     }
 
     readonly name: string;
 
-    readonly packingMethod: PackingMethod;
+    get packingMethod(): PackingMethod {
+        return this._packingMethod;
+    }
 
     readonly originalSize: number;
 
@@ -36,5 +40,9 @@ export class HeaderEntry {
 
     getSize(): number {
         return this.name.length + 21;//name.length + 1 zero separator + 5 fields of 4-byte integers
+    }
+
+    __fallbackToUncompressed(): void {
+        this._packingMethod = PackingMethod.uncompressed;
     }
 }
