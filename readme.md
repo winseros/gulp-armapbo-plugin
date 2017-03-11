@@ -24,7 +24,12 @@ gulp.task('pack', () => {
             }, {
                 name: 'mission',
                 value: 'Mission Name'
-            }]
+            }],
+            compress: [
+                '**/*.sqf',
+                'mission.sqm',
+                'description.ext'
+            ]
         }))
         .pipe(gulp.dest('pbo-packed/'));
 });
@@ -37,14 +42,45 @@ pbo([options])
 Required: `no`
 
 #### options.fileName
-Type: `string` - name of the pbo file to create, e.g. `someFileName.pbo`; if no value specified, the name of the `$cwd` is used
+
+Name of the pbo file to create, e.g. `someFileName.pbo`; if no value specified, the name of the `$cwd` is used
+
+Type: `string`
+
+Default: `process.cwd()`
 
 Required: `no`
 
 #### options.extensions
+
+Adds pbo file header extension fields. You are free to place any arbitrary information here.
+
 Type: array of `{name:<string>, value:<string>}` objects, e.g. `{name: 'author', value: 'Author Name' }`
 
+Default: `undefined`
+
 Required: `no`
+
+#### options.compress
+
+Files to apply data compression to
+
+Type: `string` (glob pattern) or array of `strings` (glob patterns), e.g. `compress: 'mission.sqm'` or `compress: '**/*.sqf'` or `compress: ['**/*.sqf', '**/*.hpp', 'mission.sqm']`
+
+Default: `undefined`
+
+Required: `no`
+
+#### options.verbose
+
+Print compression information to console
+
+Type: `bool`
+
+Default: `true`
+
+Required: `no`
+
 
 [node-url]: https://nodejs.org
 [node-image]: https://img.shields.io/node/v/gulp-armapbo.svg
