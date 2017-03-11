@@ -1,6 +1,6 @@
 {
   "name": "gulp-armapbo",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "dependencies": {
     "abbrev": {
       "version": "1.0.9",
