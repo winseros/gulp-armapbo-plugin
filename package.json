@@ -23,8 +23,8 @@
   "license": "MIT",
   "repository": "https://github.com/winseros/gulp-armapbo-plugin",
   "devDependencies": {
-    "babel-core": "^6.23.1",
-    "babel-preset-env": "^1.2.1",
+    "babel-core": "^6.24.0",
+    "babel-preset-env": "^1.2.2",
     "chai": "^3.5.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
@@ -37,7 +37,7 @@
     "gulp-typescript": "^3.1.5",
     "mocha": "^3.2.0",
     "remap-istanbul": "^0.9.1",
-    "sinon": "^1.17.7",
+    "sinon": "^2.0.0",
     "tslint": "^4.5.1",
     "typescript": "^2.2.1",
     "typings": "^2.1.0"
