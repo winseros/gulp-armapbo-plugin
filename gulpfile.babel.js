@@ -60,13 +60,13 @@ gulp.task('cover:run', ['cover:instrument'], () => {
     return gulp.src(testSpecs)
         .pipe(mocha())
         .pipe(istanbul.writeReports({
-            dir: dist,
+            dir: coverageDir,
             reporters: ['json']
         }));
 });
 
 gulp.task('cover:report', ['cover:run'], () => {
-    return gulp.src(path.join(dist, 'coverage-final.json'))
+    return gulp.src(path.join(coverageDir, 'coverage-final.json'))
         .pipe(remapIstanbul({
             reports: { html: coverageDir, lcovonly: lcovFile }
         }));
