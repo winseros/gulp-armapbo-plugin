@@ -5,7 +5,7 @@ import { LzhCompressor } from '../lzh/lzhCompressor';
 import { Header } from '../../domain/header';
 import { HeaderEntry } from '../../domain/headerEntry';
 import { PackingMethod } from '../../domain/packingMethod';
-import { CompressionReporter } from '../lzh/compressionReporter';
+import { LzhReporter } from '../lzh/lzhReporter';
 
 describe('core/pboBodyWriter', () => {
 
@@ -107,7 +107,7 @@ describe('core/pboBodyWriter', () => {
         it('should write compressed data to buffer', () => {
             const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
-            const stubReport = sandbox.stub(CompressionReporter.prototype, 'reportFile');
+            const stubReport = sandbox.stub(LzhReporter.prototype, 'reportFile');
 
             stubCompressed.returns(1);
             stubUncompressed.returns(2);
@@ -122,7 +122,7 @@ describe('core/pboBodyWriter', () => {
 
             expect(stubUncompressed.callCount).to.equal(0);
             expect(stubCompressed.callCount).to.equal(1);
-            expect(stubCompressed.withArgs(entry.contents, buf, 100500).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(entry, buf, 100500).callCount).to.equal(1);
 
             expect(stubReport.withArgs('some-entry-name', 100501, 1).callCount).to.equal(1);
         });
@@ -130,7 +130,7 @@ describe('core/pboBodyWriter', () => {
         it('should fall back to uncompressed if compressed size is greater than original', () => {
             const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
-            const stubReport = sandbox.stub(CompressionReporter.prototype, 'reportFile');
+            const stubReport = sandbox.stub(LzhReporter.prototype, 'reportFile');
 
             stubCompressed.returns(100502);
             stubUncompressed.returns(2);
@@ -146,9 +146,9 @@ describe('core/pboBodyWriter', () => {
 
             expect(stubUncompressed.withArgs(buf, entry, 100500).callCount).to.equal(1);
             expect(stubCompressed.callCount).to.equal(1);
-            expect(stubCompressed.withArgs(entry.contents, buf, 100500).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(entry, buf, 100500).callCount).to.equal(1);
 
-            expect(stubReport.callCount).to.equal(0);
+            expect(stubReport.withArgs('some-entry-name', 1, 1).callCount).to.equal(1);
         });
     });
 });

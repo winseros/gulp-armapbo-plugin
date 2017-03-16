@@ -1,7 +1,8 @@
 import { StreamOptions } from '../streamOptions';
 import * as chalk from 'chalk';
+import * as log from 'single-line-log';
 
-export class CompressionReporter {
+export class LzhReporter {
     private readonly _options: StreamOptions;
 
     constructor(options: StreamOptions) {
@@ -25,8 +26,21 @@ export class CompressionReporter {
         }
     }
 
+    reportProgress(name: string, originalSize: number, processedSize: number): void {
+        if (this._options.progress) {
+            if (processedSize < originalSize) {
+                const percentage = Math.round(processedSize / originalSize * 100);
+                const formatted = percentage < 10 ? `0${percentage}` : percentage;
+                log.stdout(`Progress: ${formatted}% | ${name}`);
+            } else {
+                log.stdout('');
+            }
+        }
+    }
+
     _normalizeOptions(): void {
         this._options.verbose = this._options.verbose !== false;
+        this._options.progress = this._options.progress !== false;
     }
 
     _getStyledPercentage(originalSize: number, compressedSize: number): string {

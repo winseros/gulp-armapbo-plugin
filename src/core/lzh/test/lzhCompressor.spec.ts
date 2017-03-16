@@ -1,8 +1,11 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { HeaderEntry } from '../../../domain/headerEntry';
+import { PackingMethod } from '../../../domain/packingMethod';
 import { LzhCompressor } from '../lzhCompressor';
 import { StackBuffer } from '../stackBuffer';
 import { LzhPacket } from '../lzhPacket';
+import { LzhReporter } from '../lzhReporter';
 
 describe('core/lzh/lzhCompressor', () => {
     let sandbox: sinon.SinonSandbox;
@@ -38,25 +41,40 @@ describe('core/lzh/lzhCompressor', () => {
             const stubWriteCrc = sandbox.stub(LzhCompressor.prototype, '_writeCrc');
             stubWriteCrc.returns(100500);
 
+            const stubProgress = sandbox.stub(LzhReporter.prototype, 'reportProgress');
+
             const source = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
             const target = Buffer.allocUnsafe(0);
 
             const dict = { prop: 'dict' } as any;
             sandbox.stub(LzhCompressor.prototype, '_getCompressionDict').returns(dict);
 
-            const result = new LzhCompressor().writeCompressed(source, target, 10);
+            const entry = new HeaderEntry('entry-name', PackingMethod.uncompressed, 0, 0);
+            entry.contents = source;
+
+            const result = new LzhCompressor({}).writeCompressed(entry, target, 10);
             expect(result).to.equal(100490);
 
+            //packets creation checks
             expect(createPacket.callCount).to.equal(3);
             expect(packet1.compose.calledWith(source, 0, dict)).to.equal(true);
             expect(packet2.compose.calledWith(source, 5, dict)).to.equal(true);
             expect(packet3.compose.calledWith(source, 16, dict)).to.equal(true);
 
+            //packets flush checks
             expect(packet1.flush.calledWith(target, 10)).to.equal(true);
             expect(packet2.flush.calledWith(target, 13)).to.equal(true);
             expect(packet3.flush.calledWith(target, 18)).to.equal(true);
 
+            //crc write checks
             expect(stubWriteCrc.withArgs(source, target, 25).callCount).to.equal(1);
+
+            //progress report checks
+            expect(stubProgress.withArgs('entry-name', source.length, 0).callCount).to.equal(1);
+            expect(stubProgress.withArgs('entry-name', source.length, 5).callCount).to.equal(1);
+            expect(stubProgress.withArgs('entry-name', source.length, 16).callCount).to.equal(1);
+            expect(stubProgress.withArgs('entry-name', source.length, 37).callCount).to.equal(1);
+            expect(stubProgress.withArgs('entry-name', source.length, source.length).callCount).to.equal(1);
         });
     });
 
@@ -67,7 +85,7 @@ describe('core/lzh/lzhCompressor', () => {
 
             const source = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
             const target = Buffer.alloc(6);
-            const crc = new LzhCompressor()._writeCrc(source, target, 1);
+            const crc = new LzhCompressor({})._writeCrc(source, target, 1);
 
             expect(crc).to.equal(5);
             expect(getCrc.withArgs(source).callCount).to.equal(1);
@@ -78,7 +96,7 @@ describe('core/lzh/lzhCompressor', () => {
     describe('_getCrc', () => {
         it('should return a summ of buffer elements', () => {
             const buf = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-            const crc = new LzhCompressor()._getCrc(buf);
+            const crc = new LzhCompressor({})._getCrc(buf);
 
             expect(crc).to.equal(55);
         });
@@ -86,7 +104,7 @@ describe('core/lzh/lzhCompressor', () => {
 
     describe('_getCompressionDict', () => {
         it('should create a new compression dict', () => {
-            const compressor = new LzhCompressor();
+            const compressor = new LzhCompressor({});
 
             const dict1 = compressor._getCompressionDict();
             const dict2 = compressor._getCompressionDict();
@@ -99,7 +117,7 @@ describe('core/lzh/lzhCompressor', () => {
 
     describe('_getPacket', () => {
         it('should create a new packet', () => {
-            const compressor = new LzhCompressor();
+            const compressor = new LzhCompressor({});
 
             const packet1 = compressor._getPacket();
             const packet2 = compressor._getPacket();

@@ -8,4 +8,5 @@ export interface StreamOptions {
     extensions?: IHeaderExtension[];
     compress?: string | string[];
     verbose?: boolean;
+    progress?: boolean;
 }

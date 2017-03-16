@@ -3,7 +3,7 @@ import { PackingMethod } from '../../domain/packingMethod';
 import { HeaderExtension } from '../../domain/headerExtension';
 import { HeaderEntry } from '../../domain/headerEntry';
 import { Header } from '../../domain/header';
-import { CompressionReporter } from '../lzh/compressionReporter';
+import { LzhReporter } from '../lzh/lzhReporter';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
@@ -35,7 +35,7 @@ describe('core/pboFormatter', () => {
             entry1.contents = contents1;
             entry2.contents = contents2;
 
-            const stubReport = sandbox.stub(CompressionReporter.prototype, 'reportOverall');
+            const stubReport = sandbox.stub(LzhReporter.prototype, 'reportOverall');
 
             const buffer = new PboFormatter().format(new Header([extension1, extension2], [entry1, entry2]), {});
 

@@ -4,7 +4,7 @@ import { PboBodyWriter } from './pboBodyWriter';
 import { PboHeaderWriter } from './pboHeaderWriter';
 import { PboChecksumWriter } from './pboChecksumWriter';
 import { StreamOptions } from './streamOptions';
-import { CompressionReporter } from './lzh/compressionReporter';
+import { LzhReporter } from './lzh/lzhReporter';
 
 export class PboFormatter {
     format(header: Header, options: StreamOptions): Buffer {
@@ -20,7 +20,7 @@ export class PboFormatter {
         const compressedLength = contents.length + PboChecksumWriter.blockSize;
         const bytes = Buffer.from(buf.raw, 0, compressedLength);
 
-        new CompressionReporter(options).reportOverall(buf.raw.byteLength, compressedLength);
+        new LzhReporter(options).reportOverall(buf.raw.byteLength, compressedLength);
 
         return bytes;
     }

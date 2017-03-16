@@ -2,15 +2,16 @@ import { Header } from '../domain/header';
 import { HeaderEntry } from '../domain/headerEntry';
 import { PackingMethod } from '../domain/packingMethod';
 import { LzhCompressor } from './lzh/lzhCompressor';
-import { CompressionReporter } from './lzh/compressionReporter';
+import { LzhReporter } from './lzh/lzhReporter';
 import { StreamOptions } from './streamOptions';
 
 export class PboBodyWriter {
-    private readonly _lzhCompressor = new LzhCompressor();
-    private readonly _reporter: CompressionReporter;
+    private readonly _lzhCompressor: LzhCompressor;
+    private readonly _reporter: LzhReporter;
 
     constructor(options: StreamOptions) {
-        this._reporter = new CompressionReporter(options);
+        this._reporter = new LzhReporter(options);
+        this._lzhCompressor = new LzhCompressor(options);
     }
 
     writeBody(buffer: Buffer, header: Header): number {
@@ -37,10 +38,11 @@ export class PboBodyWriter {
     }
 
     _writeCompressed(buffer: Buffer, entry: HeaderEntry, offset: number): number {
-        let written = this._lzhCompressor.writeCompressed(entry.contents, buffer, offset);
+        let written = this._lzhCompressor.writeCompressed(entry, buffer, offset);
         if (written >= entry.originalSize) {
             written = this._writeUncompressed(buffer, entry, offset);
             entry.__fallbackToUncompressed();
+            this._reporter.reportFile(entry.name, 1, 1);//0% compression
         }
         else {
             this._reporter.reportFile(entry.name, entry.originalSize, written);
