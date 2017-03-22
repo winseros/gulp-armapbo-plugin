@@ -81,6 +81,16 @@ Default: `true`
 
 Required: `no`
 
+#### options.progress
+
+Print the current file compression progress to console
+
+Type: `bool`
+
+Default: `true`
+
+Required: `no`
+
 
 [node-url]: https://nodejs.org
 [node-image]: https://img.shields.io/node/v/gulp-armapbo.svg
