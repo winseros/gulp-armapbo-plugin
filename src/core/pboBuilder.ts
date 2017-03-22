@@ -1,11 +1,11 @@
 import * as File from 'vinyl';
-import * as minimatch from 'minimatch';
 import { StreamOptions } from './streamOptions';
 import { HeaderEntry } from '../domain/headerEntry';
 import { HeaderExtension } from '../domain/headerExtension';
 import { Header } from '../domain/header';
 import { PackingMethod } from '../domain/packingMethod';
 import { PboFormatter } from './pboFormatter';
+import { PackingFuncFactory } from './packingFuncFactory';
 
 export class PboBuilder {
     build(files: File[], options: StreamOptions): Buffer {
@@ -13,7 +13,7 @@ export class PboBuilder {
             ? options.extensions.map(ext => new HeaderExtension(ext.name, ext.value))
             : [];
 
-        const getPackingMethod = this._getPackingMethodFunc(options);
+        const getPackingMethod = PackingFuncFactory.getPackingFunc(options);
 
         const entries = files.map(file => {
             const fileData = file.contents as Buffer;
@@ -35,24 +35,5 @@ export class PboBuilder {
         const header = new Header(extensions, entries);
         const buf = new PboFormatter().format(header, options);
         return buf;
-    }
-
-    _getPackingMethodFunc(options: StreamOptions): (f: File) => PackingMethod {
-        const compress = options.compress;
-        switch (true) {
-            case (typeof compress === 'string'): {
-                return (f: File) => (f.contents as Buffer).length && minimatch(f.relative, compress as string) ? PackingMethod.packed : PackingMethod.uncompressed;
-            }
-            case (Array.isArray(compress)): {
-                const patterns = (compress as string[]).filter(s => !!(typeof s === 'string' && s.trim()));
-                const func = patterns.length
-                    ? (f: File) => (f.contents as Buffer).length && patterns.some(p => minimatch(f.relative, p)) ? PackingMethod.packed : PackingMethod.uncompressed
-                    : () => PackingMethod.uncompressed;
-                return func;
-            }
-            default: {
-                return () => PackingMethod.uncompressed;
-            }
-        }
     }
 }
