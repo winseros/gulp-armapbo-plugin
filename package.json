@@ -21,7 +21,13 @@
   ],
   "author": "winse",
   "license": "MIT",
-  "repository": "https://github.com/winseros/gulp-armapbo-plugin",
+  "bugs": {
+    "url": "https://github.com/winseros/gulp-armapbo-plugin/issues"
+  },
+  "homepage": "https://github.com/winseros/gulp-armapbo-plugin#readme",
+  "engines": {
+    "node": ">=6.9.0"
+  },
   "devDependencies": {
     "babel-core": "^6.24.0",
     "babel-preset-env": "^1.2.2",
