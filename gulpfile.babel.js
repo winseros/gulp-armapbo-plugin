@@ -32,9 +32,9 @@ gulp.task('tslint', () => {
         }));
 });
 
-gulp.task('assemble', ['clean', 'tslint'], () => {
-    const tsproject = tsc.createProject('tsconfig.json');
+const tsproject = tsc.createProject('tsconfig.json');
 
+gulp.task('assemble', ['clean', 'tslint'], () => {
     return gulp.src([typingFiles, sourceFiles])
         .pipe(sourcemaps.init())
         .pipe(tsproject()).js
