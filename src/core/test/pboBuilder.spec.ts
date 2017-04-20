@@ -127,9 +127,16 @@ describe('core/pboBuilder', () => {
             const data = new PboBuilder().build([file1, file2, file3, file4, file5], options);
             expect(data).to.equal(result);
 
-            const header = stubFormat.args[0][0] as Header;
+            //stubPackingFunc assert
+            expect(stubPackingFunc.callCount).to.equal(5);
+            expect(stubPackingFunc.args[0][0]).to.equal(file1);
+            expect(stubPackingFunc.args[1][0]).to.equal(file2);
+            expect(stubPackingFunc.args[2][0]).to.equal(file3);
+            expect(stubPackingFunc.args[3][0]).to.equal(file4);
+            expect(stubPackingFunc.args[4][0]).to.equal(file5);
 
             //entries assert
+            const header = stubFormat.args[0][0] as Header;
             expect(header.entries.length).to.equal(5);
             expect(header.entries[0].name).to.equal('file2.txt');
             expect(header.entries[0].packingMethod).to.equal(PackingMethod.uncompressed);
@@ -141,6 +148,38 @@ describe('core/pboBuilder', () => {
             expect(header.entries[3].packingMethod).to.equal(PackingMethod.packed);
             expect(header.entries[4].name).to.equal('file3.sqf');
             expect(header.entries[4].packingMethod).to.equal(PackingMethod.packed);
+        });
+
+        it('should filter out entries with empty contents', () => {
+            //entries
+            const contents1 = Buffer.allocUnsafe(10);
+            const contents2: Buffer | null = null;
+            const file1 = new File({ path: 'file1.sqf', contents: contents1, stat: { mtime: new Date('2015-05-15T00:00:00+0000') } as any });
+            const file2 = new File({ path: 'file2.txt', contents: contents2!, stat: { mtime: new Date('2015-05-20T00:00:00+0000') } as any });
+
+            //packing method function
+            const stubPackingFunc = sandbox.stub();
+            stubPackingFunc.onCall(0).returns(PackingMethod.uncompressed);
+            const stubPackingFactory = sandbox.stub(PackingFuncFactory, 'getPackingFunc');
+            stubPackingFactory.returns(stubPackingFunc);
+
+            //internal services
+            const result = Buffer.allocUnsafe(20);
+            const stubFormat = sandbox.stub(PboFormatter.prototype, 'format').returns(result);
+
+            //call the method
+            const data = new PboBuilder().build([file1, file2], {});
+            expect(data).to.equal(result);
+
+            //stubPackingFunc assert
+            expect(stubPackingFunc.callCount).to.equal(1);
+            expect(stubPackingFunc.args[0][0]).to.equal(file1);
+
+            //entries assert
+            const header = stubFormat.args[0][0] as Header;
+            expect(header.entries.length).to.equal(1);
+            expect(header.entries[0].name).to.equal('file1.sqf');
+            expect(header.entries[0].packingMethod).to.equal(PackingMethod.uncompressed);
         });
     });
 });
