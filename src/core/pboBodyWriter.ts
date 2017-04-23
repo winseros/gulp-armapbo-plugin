@@ -38,7 +38,8 @@ export class PboBodyWriter {
     }
 
     _writeCompressed(buffer: Buffer, entry: HeaderEntry, offset: number): number {
-        let written = this._lzhCompressor.writeCompressed(entry, buffer, offset);
+        let written = this._safeWriteCompressed(buffer, entry, offset);
+
         if (written >= entry.originalSize) {
             written = this._writeUncompressed(buffer, entry, offset);
             entry.__fallbackToUncompressed();
@@ -46,6 +47,20 @@ export class PboBodyWriter {
         }
         else {
             this._reporter.reportFile(entry.name, entry.originalSize, written);
+        }
+        return written;
+    }
+
+    _safeWriteCompressed(buffer: Buffer, entry: HeaderEntry, offset: number): number {
+        let written = 0;
+        try {
+            written = this._lzhCompressor.writeCompressed(entry, buffer, offset);
+        } catch (ex) {
+            if (ex instanceof RangeError) {//in some circumstances thrown when the last entry has been compressed to a size greater than original size and has owerflown the buffer space remaining
+                written = buffer.length;
+            } else {
+                throw ex;
+            }
         }
         return written;
     }

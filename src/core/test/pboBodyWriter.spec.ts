@@ -105,7 +105,7 @@ describe('core/pboBodyWriter', () => {
 
     describe('_writeCompressed', () => {
         it('should write compressed data to buffer', () => {
-            const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
+            const stubCompressed = sandbox.stub(PboBodyWriter.prototype, '_safeWriteCompressed');
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
             const stubReport = sandbox.stub(LzhReporter.prototype, 'reportFile');
 
@@ -121,14 +121,13 @@ describe('core/pboBodyWriter', () => {
             expect(written).to.equal(1);
 
             expect(stubUncompressed.callCount).to.equal(0);
-            expect(stubCompressed.callCount).to.equal(1);
-            expect(stubCompressed.withArgs(entry, buf, 100500).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(buf, entry, 100500).callCount).to.equal(1);
 
             expect(stubReport.withArgs('some-entry-name', 100501, 1).callCount).to.equal(1);
         });
 
         it('should fall back to uncompressed if compressed size is greater than original', () => {
-            const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
+            const stubCompressed = sandbox.stub(PboBodyWriter.prototype, '_safeWriteCompressed');
             const stubUncompressed = sandbox.stub(PboBodyWriter.prototype, '_writeUncompressed');
             const stubReport = sandbox.stub(LzhReporter.prototype, 'reportFile');
 
@@ -145,10 +144,49 @@ describe('core/pboBodyWriter', () => {
             expect(entry.packingMethod).to.equal(PackingMethod.uncompressed);
 
             expect(stubUncompressed.withArgs(buf, entry, 100500).callCount).to.equal(1);
-            expect(stubCompressed.callCount).to.equal(1);
-            expect(stubCompressed.withArgs(entry, buf, 100500).callCount).to.equal(1);
+            expect(stubCompressed.withArgs(buf, entry, 100500).callCount).to.equal(1);
 
             expect(stubReport.withArgs('some-entry-name', 1, 1).callCount).to.equal(1);
+        });
+    });
+
+    describe('_safeWriteCompressed', () => {
+        it('should call LzhCompressor and return its output', () => {
+            const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
+            stubCompressed.returns(100500);
+
+            const entry = new HeaderEntry('some-entry-name', PackingMethod.packed, 0, 0);
+            const buf = Buffer.allocUnsafe(10);
+
+            const written = new PboBodyWriter({})._safeWriteCompressed(buf, entry, 100501);
+
+            expect(stubCompressed.withArgs(entry, buf, 100501).callCount).to.equal(1);
+            expect(written).to.equal(100500);
+        });
+
+        it('should swallow RangeError`s and return buffer.length', () => {
+            const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
+            stubCompressed.throws(new RangeError('out of range'));
+
+            const entry = new HeaderEntry('some-entry-name', PackingMethod.packed, 0, 0);
+            const buf = Buffer.allocUnsafe(10);
+
+            const written = new PboBodyWriter({})._safeWriteCompressed(buf, entry, 100501);
+
+            expect(stubCompressed.withArgs(entry, buf, 100501).callCount).to.equal(1);
+            expect(written).to.equal(buf.length);
+        });
+
+        it('should rethrow non-RangeError`s', () => {
+            const ex = new Error('some error');
+            const stubCompressed = sandbox.stub(LzhCompressor.prototype, 'writeCompressed');
+            stubCompressed.throws(ex);
+
+            const entry = new HeaderEntry('some-entry-name', PackingMethod.packed, 0, 0);
+            const buf = Buffer.allocUnsafe(10);
+            const writer = new PboBodyWriter({});
+
+            expect(() => writer._safeWriteCompressed(buf, entry, 100501)).to.throw(ex);
         });
     });
 });
