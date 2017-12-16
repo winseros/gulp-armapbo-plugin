@@ -83,7 +83,7 @@ describe('core/pboBuilder', () => {
             expect(header.entries[0].originalSize).to.equal(contents1.length);
             expect(header.entries[0].dataSize).to.equal(contents1.length);
             expect(header.entries[0].contents).to.equal(contents1);
-            expect(header.entries[0].timestamp).to.equal(file1.stat.mtime.getTime() / 1000);
+            expect(header.entries[0].timestamp).to.equal(file1.stat!.mtime.getTime() / 1000);
 
             //entry2
             expect(header.entries[1]).to.be.instanceof(HeaderEntry);
@@ -92,7 +92,7 @@ describe('core/pboBuilder', () => {
             expect(header.entries[1].originalSize).to.equal(contents2.length);
             expect(header.entries[1].dataSize).to.equal(contents2.length);
             expect(header.entries[1].contents).to.equal(contents2);
-            expect(header.entries[1].timestamp).to.equal(file2.stat.mtime.getTime() / 1000);
+            expect(header.entries[1].timestamp).to.equal(file2.stat!.mtime.getTime() / 1000);
         });
 
         it('should sort entries by packing method', () => {

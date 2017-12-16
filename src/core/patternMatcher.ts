@@ -1,4 +1,4 @@
-import { Minimatch } from 'minimatch';
+import { IMinimatch, Minimatch } from 'minimatch';
 
 export class PatternMatcher {
     static create(patterns: string[]) {
@@ -6,9 +6,9 @@ export class PatternMatcher {
         return new PatternMatcher(matchers);
     }
 
-    private readonly _matchers: Minimatch[];
+    private readonly _matchers: IMinimatch[];
 
-    constructor(matchers: Minimatch[]) {
+    constructor(matchers: IMinimatch[]) {
         this._matchers = matchers;
     }
 

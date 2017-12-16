@@ -17,7 +17,7 @@ export class PboBuilder {
 
         const entries = files.filter(file => !!file.contents).map(file => {
             const fileData = file.contents as Buffer;
-            const timeStamp = file.stat.mtime.getTime() / 1000;
+            const timeStamp = file.stat!.mtime.getTime() / 1000;
 
             const packingMethod = getPackingMethod(file);
 

@@ -1,6 +1,7 @@
 import { StreamOptions } from '../streamOptions';
-import * as chalk from 'chalk';
+import chalk, { Chalk } from 'chalk';
 import * as log from 'single-line-log';
+import { log as gulpLog } from 'gulp-util';
 
 export class LzhReporter {
     private readonly _options: StreamOptions;
@@ -45,14 +46,14 @@ export class LzhReporter {
 
     _getStyledPercentage(originalSize: number, compressedSize: number): string {
         const percentage = Math.round((1 - compressedSize / originalSize) * 100);
-        const style = this._getPercentageStyle(percentage);
+        const percentageChalk = this._getPercentageChalk(percentage);
         const formatted = percentage < 10 ? `0${percentage}` : percentage;
-        const text = style(`${formatted}%`);
+        const text = percentageChalk(`${formatted}%`);
         return text;
     }
 
-    _getPercentageStyle(percentage: number): chalk.Style {
-        let style: chalk.Style;
+    _getPercentageChalk(percentage: number): Chalk {
+        let style: Chalk;
         switch (true) {
             case (percentage > 30):
                 style = chalk.green;
@@ -71,6 +72,10 @@ export class LzhReporter {
     }
 
     _writeMessage(message: string): void {
-        console.log(message);
+        gulpLog(message);
+    }
+
+    get options() {
+        return this._options;
     }
 }

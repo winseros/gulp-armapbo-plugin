@@ -1,62 +1,68 @@
 {
-  "name": "gulp-armapbo",
-  "version": "1.1.2",
-  "description": "The plugin for Gulp which allows to pack ArmA pbo files from sources.",
-  "main": "dist/main.js",
-  "scripts": {
-    "install:typings": "./node_modules/.bin/typings install",
-    "install:dev": "npm install && npm run install:typings",
-    "test": "./node_modules/.bin/gulp test:run",
-    "cover": "./node_modules/.bin/gulp cover:report",
-    "coveralls": "./node_modules/.bin/gulp cover:coveralls",
-    "assemble": "./node_modules/.bin/gulp assemble",
-    "watch": "./node_modules/.bin/gulp watch"
-  },
-  "keywords": [
-    "arma",
-    "arma2",
-    "arma3",
-    "pbo",
-    "gulpplugin"
-  ],
-  "author": "winse",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/winseros/gulp-armapbo-plugin/issues"
-  },
-  "homepage": "https://github.com/winseros/gulp-armapbo-plugin#readme",
-  "engines": {
-    "node": ">=6.9.0"
-  },
-  "devDependencies": {
-    "babel-core": "^6.24.0",
-    "babel-preset-env": "^1.2.2",
-    "chai": "^3.5.0",
-    "del": "^2.2.2",
-    "gulp": "^3.9.1",
-    "gulp-cached": "^1.1.1",
-    "gulp-coveralls": "^0.1.4",
-    "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.1",
-    "gulp-sourcemaps": "^2.4.1",
-    "gulp-tslint": "^7.1.0",
-    "gulp-typescript": "^3.1.5",
-    "mocha": "^3.2.0",
-    "remap-istanbul": "^0.9.1",
-    "sinon": "^2.0.0",
-    "tslint": "^4.5.1",
-    "typescript": "^2.2.1",
-    "typings": "^2.1.0"
-  },
-  "dependencies": {
-    "chalk": "^1.1.3",
-    "minimatch": "^3.0.3",
-    "single-line-log": "^1.1.2",
-    "vinyl": "^2.0.1"
-  },
-  "files": [
-    "dist/**/*.js",
-    "dist/**/*.js.map",
-    "!**/test/"
-  ]
+    "name": "gulp-armapbo",
+    "version": "1.1.2",
+    "description": "The plugin for Gulp which allows to pack ArmA pbo files from sources.",
+    "repository": "https://github.com/winseros/gulp-armapbo-plugin",
+    "main": "dist/main.js",
+    "scripts": {
+        "test": "./node_modules/.bin/gulp test:run",
+        "cover": "./node_modules/.bin/gulp cover:report",
+        "coveralls": "./node_modules/.bin/gulp cover:coveralls",
+        "assemble": "./node_modules/.bin/gulp assemble",
+        "watch": "./node_modules/.bin/gulp watch"
+    },
+    "keywords": [
+        "arma",
+        "arma2",
+        "arma3",
+        "pbo",
+        "gulpplugin"
+    ],
+    "author": "winse",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/winseros/gulp-armapbo-plugin/issues"
+    },
+    "homepage": "https://github.com/winseros/gulp-armapbo-plugin#readme",
+    "engines": {
+        "node": ">=6.9.0"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.0.10",
+        "@types/gulp-util": "^3.0.34",
+        "@types/minimatch": "^3.0.2",
+        "@types/mocha": "^2.2.44",
+        "@types/node": "^6.0.94",
+        "@types/sinon": "^4.1.2",
+        "@types/vinyl": "^2.0.1",
+        "babel-core": "^6.26.0",
+        "babel-preset-env": "^1.6.1",
+        "chai": "^4.1.2",
+        "del": "^3.0.0",
+        "gulp": "^3.9.1",
+        "gulp-cached": "^1.1.1",
+        "gulp-coveralls": "^0.1.4",
+        "gulp-istanbul": "^1.1.2",
+        "gulp-mocha": "^4.3.1",
+        "gulp-sourcemaps": "^2.6.1",
+        "gulp-tslint": "^8.1.2",
+        "gulp-typescript": "^3.2.3",
+        "mocha": "^4.0.1",
+        "remap-istanbul": "^0.9.5",
+        "sinon": "^4.1.3",
+        "tslint": "^5.8.0",
+        "typescript": "^2.6.2"
+    },
+    "dependencies": {
+        "chalk": "^2.3.0",
+        "gulp-util": "^3.0.8",
+        "minimatch": "^3.0.4",
+        "single-line-log": "^1.1.2",
+        "vinyl": "^2.1.0"
+    },
+    "files": [
+        "dist/**/*.js",
+        "dist/**/*.js.map",
+        "!**/test/"
+    ]
 }

@@ -8,7 +8,6 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "noResolve": true,
         "noUnusedLocals": true,
         "pretty": true,
         "strictNullChecks": true,

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import * as log from 'single-line-log';
 import { LzhReporter } from '../lzhReporter';
 import { StreamOptions } from '../../streamOptions';
@@ -18,67 +18,41 @@ describe('lzhReporter', () => {
 
     describe('ctor', () => {
         it('should set options.verbose to true if it is not false', () => {
-            //tslint:disable:no-unused-new
-
             const options = {} as StreamOptions;
-            new LzhReporter(options);
-            expect(options.verbose).to.equal(true);
+            expect(new LzhReporter(options).options.verbose).to.equal(true);
 
             options.verbose = 1 as any;
-            new LzhReporter(options);
-            expect(options.verbose).to.equal(true);
+            expect(new LzhReporter(options).options.verbose).to.equal(true);
 
             options.verbose = {} as any;
-            new LzhReporter(options);
-            expect(options.verbose).to.equal(true);
+            expect(new LzhReporter(options).options.verbose).to.equal(true);
 
             options.verbose = '' as any;
-            new LzhReporter(options);
-            expect(options.verbose).to.equal(true);
-
-            //tslint:enable:no-unused-new
+            expect(new LzhReporter(options).options.verbose).to.equal(true);
         });
 
         it('should leave options.verbose as false', () => {
-            //tslint:disable:no-unused-new
-
             const options = { verbose: false } as StreamOptions;
-            new LzhReporter(options);
-            expect(options.verbose).to.equal(false);
-
-            //tslint:enable:no-unused-new
+            expect(new LzhReporter(options).options.verbose).to.equal(false);
         });
 
         it('should set options.progress to true if it is not false', () => {
-            //tslint:disable:no-unused-new
-
             const options = {} as StreamOptions;
-            new LzhReporter(options);
-            expect(options.progress).to.equal(true);
+            expect(new LzhReporter(options).options.progress).to.equal(true);
 
             options.verbose = 1 as any;
-            new LzhReporter(options);
-            expect(options.progress).to.equal(true);
+            expect(new LzhReporter(options).options.progress).to.equal(true);
 
             options.verbose = {} as any;
-            new LzhReporter(options);
-            expect(options.progress).to.equal(true);
+            expect(new LzhReporter(options).options.progress).to.equal(true);
 
             options.verbose = '' as any;
-            new LzhReporter(options);
-            expect(options.progress).to.equal(true);
-
-            //tslint:enable:no-unused-new
+            expect(new LzhReporter(options).options.progress).to.equal(true);
         });
 
         it('should leave options.progress as false', () => {
-            //tslint:disable:no-unused-new
-
             const options = { progress: false } as StreamOptions;
-            new LzhReporter(options);
-            expect(options.progress).to.equal(false);
-
-            //tslint:enable:no-unused-new
+            expect(new LzhReporter(options).options.progress).to.equal(false);
         });
     });
 
