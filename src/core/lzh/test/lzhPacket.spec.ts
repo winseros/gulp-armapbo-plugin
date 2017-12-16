@@ -113,15 +113,49 @@ describe('core/lzh/lzhPacket', () => {
 
             expect(processed).to.equal(100500);
 
-            const subSource = Buffer.from(source.buffer, offset, read);
-            expect(dict.intersect.withArgs(subSource).callCount).to.equal(1);
-            expect(dict.checkWhitespace.withArgs(subSource).callCount).to.equal(1);
-            expect(dict.checkSequence.withArgs(subSource).callCount).to.equal(1);
+            const next = dict.intersect.args[0][0] as Buffer;
+            expect(next[0]).to.equal(5);
+            expect(next[1]).to.equal(6);
+            expect(next[2]).to.equal(7);
+
+            expect(dict.intersect.withArgs(next, read).callCount).to.equal(1);
+            expect(dict.checkWhitespace.withArgs(next, read).callCount).to.equal(1);
+            expect(dict.checkSequence.withArgs(next, read).callCount).to.equal(1);
 
             expect(stubUncompressed.withArgs(1, source, offset, dict).callCount).to.equal(1);
         });
 
-        it('should pack uning an intersection', () => {
+        it('should not try to read after the end of source', function () {
+            const dict = {
+                intersect: sandbox.stub(),
+                checkWhitespace: sandbox.stub(),
+                checkSequence: sandbox.stub()
+            } as any;
+
+            dict.intersect.returns({ length: 0, position: 0 } as BufferIntersection);
+            dict.checkWhitespace.returns(0);
+            dict.checkSequence.returns({ sourceBytes: 0, sequenceBytes: 0 } as SequenceInspection);
+
+            sandbox.stub(LzhPacket.prototype, '_composeUncompressed').returns(1);
+
+            const source = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            const read = 100;//too many
+            const offset = 5;
+            new LzhPacket()._composeCompressed(1, read, source, offset, dict);
+
+            const next = dict.intersect.args[0][0] as Buffer;
+            expect(next[0]).to.equal(5);
+            expect(next[1]).to.equal(6);
+            expect(next[2]).to.equal(7);
+            expect(next[3]).to.equal(8);
+            expect(next[4]).to.equal(9);
+
+            expect(dict.intersect.withArgs(next, 5).callCount).to.equal(1);
+            expect(dict.checkWhitespace.withArgs(next, 5).callCount).to.equal(1);
+            expect(dict.checkSequence.withArgs(next, 5).callCount).to.equal(1);
+        });
+
+        it('should pack using an intersection', () => {
             const dict = {
                 add: sandbox.spy(),
                 intersect: sandbox.stub(),
@@ -154,7 +188,7 @@ describe('core/lzh/lzhPacket', () => {
             expect(target).to.eql(Buffer.from([0, 0b01010101, 0b10101010, 0]));
         });
 
-        it('should pack uning whitespaces', () => {
+        it('should pack using whitespaces', () => {
             const dict = {
                 add: sandbox.spy(),
                 intersect: sandbox.stub(),
@@ -186,7 +220,7 @@ describe('core/lzh/lzhPacket', () => {
             expect(target).to.eql(Buffer.from([0, 0b01010101, 0b10101010, 0]));
         });
 
-        it('should not pack uning whitespaces if offset is greater than stackbuffer size', () => {
+        it('should not pack using whitespaces if offset is greater than stackbuffer size', () => {
             const dict = {
                 add: sandbox.spy(),
                 intersect: sandbox.stub(),

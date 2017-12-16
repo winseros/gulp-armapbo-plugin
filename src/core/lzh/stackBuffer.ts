@@ -27,12 +27,12 @@ export class StackBuffer {
         }
     }
 
-    intersect(buffer: Buffer): BufferIntersection {
-        if (buffer.length && this._fullfilment) {
+    intersect(buffer: Buffer, length: number): BufferIntersection {
+        if (length && this._fullfilment) {
             let intersection: BufferIntersection | undefined;
             let offset = 0;
             while (true) {
-                const next = this._intersectBufferAtOffset(buffer, offset);
+                const next = this._intersectBufferAtOffset(buffer, length, offset);
                 if (!intersection || intersection.length < next.length) {
                     intersection = next;
                 }
@@ -44,7 +44,7 @@ export class StackBuffer {
             }
             return intersection;
         } else {
-            return { position: -1, length: 0 };
+            return {position: -1, length: 0};
         }
     }
 
@@ -52,12 +52,12 @@ export class StackBuffer {
         return this._fullfilment;
     }
 
-    _intersectBufferAtOffset(buffer: Buffer, offset: number): BufferIntersection {
+    _intersectBufferAtOffset(buffer: Buffer, bLength: number, offset: number): BufferIntersection {
         let position = this._data.indexOf(buffer[0], offset);
         let length = 0;
         if (position >= 0 && position < this._fullfilment) {
             length++;
-            for (let bufIndex = 1, dataIndex = position + 1; bufIndex < buffer.length && dataIndex < this.fullfilment; bufIndex++ , dataIndex++) {
+            for (let bufIndex = 1, dataIndex = position + 1; bufIndex < bLength && dataIndex < this.fullfilment; bufIndex++ , dataIndex++) {
                 if (this._data[dataIndex] === buffer[bufIndex]) {
                     length++;
                 } else {
@@ -67,13 +67,13 @@ export class StackBuffer {
         } else {
             position = -1;
         }
-        return { position, length };
+        return {position, length};
     }
 
-    checkWhitespace(buffer: Buffer): number {
+    checkWhitespace(buffer: Buffer, length: number): number {
         let count = 0;
-        for (const b of buffer) {
-            if (b === 0x20) {
+        for (let i = 0; i < length; i++) {
+            if (buffer[i] === 0x20) {
                 count++;
             } else {
                 break;
@@ -82,11 +82,11 @@ export class StackBuffer {
         return count;
     }
 
-    checkSequence(buffer: Buffer): SequenceInspection {
-        let result = { sourceBytes: 0, sequenceBytes: 0 };
-        const maxSourceBytes = Math.max(this._fullfilment, buffer.length);
+    checkSequence(buffer: Buffer, length: number): SequenceInspection {
+        let result = {sourceBytes: 0, sequenceBytes: 0};
+        const maxSourceBytes = Math.max(this._fullfilment, length);
         for (let i = 1; i < maxSourceBytes; i++) {
-            const sequence = this._checkSequence(buffer, i);
+            const sequence = this._checkSequence(buffer, length, i);
             if (sequence.sourceBytes > result.sourceBytes) {
                 result = sequence;
             }
@@ -94,10 +94,10 @@ export class StackBuffer {
         return result;
     }
 
-    _checkSequence(buffer: Buffer, sequenceBytes: number): SequenceInspection {
-        const result = { sequenceBytes, sourceBytes: 0 };
-        while (result.sourceBytes < buffer.length) {
-            for (let i = this._fullfilment - sequenceBytes; i < this._fullfilment && result.sourceBytes < buffer.length; i++) {
+    _checkSequence(buffer: Buffer, length: number, sequenceBytes: number): SequenceInspection {
+        const result = {sequenceBytes, sourceBytes: 0};
+        while (result.sourceBytes < length) {
+            for (let i = this._fullfilment - sequenceBytes; i < this._fullfilment && result.sourceBytes < length; i++) {
                 if (buffer[result.sourceBytes] === this._data[i]) {
                     result.sourceBytes++;
                 } else {

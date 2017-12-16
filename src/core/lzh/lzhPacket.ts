@@ -8,6 +8,7 @@ export class LzhPacket {
     static readonly maxOffsetToUseWhitespaces = StackBuffer.size - LzhPacket.maxChunkSize;
 
     private _data = Buffer.allocUnsafe(LzhPacket.chunks * LzhPacket.maxChunkSize);
+    private _next = Buffer.allocUnsafe(LzhPacket.maxChunkSize);
     private _format = 0b00000000;
     private _length = 0;
 
@@ -40,10 +41,11 @@ export class LzhPacket {
     }
 
     _composeCompressed(chunk: number, read: number, buffer: Buffer, offset: number, dict: StackBuffer): number {
-        const next = Buffer.from(buffer.buffer, offset, read);
-        const intersect = dict.intersect(next);
-        const whitespace = offset < LzhPacket.maxOffsetToUseWhitespaces ? dict.checkWhitespace(next) : 0;
-        const sequence = dict.checkSequence(next);
+        const next = buffer.copy(this._next, 0, offset, Math.min(offset + read, buffer.length));
+
+        const intersect = dict.intersect(this._next, next);
+        const whitespace = offset < LzhPacket.maxOffsetToUseWhitespaces ? dict.checkWhitespace(this._next, next) : 0;
+        const sequence = dict.checkSequence(this._next, next);
 
         let processed;
         if (intersect.length >= LzhPacket.minBytesToPack || whitespace >= LzhPacket.minBytesToPack || sequence.sourceBytes >= LzhPacket.minBytesToPack) {

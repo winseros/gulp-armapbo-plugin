@@ -23,7 +23,8 @@ describe('core/lzh/stackBuffer', () => {
             buf.add(data1, 0, data1.length);
             buf.add(data2, 0, data2.length);
 
-            const index = buf.intersect(Buffer.from([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]));
+            const check = Buffer.from([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+            const index = buf.intersect(check, check.length);
             expect(index).to.eql({ length: 10, position: 0 } as BufferIntersection);
             expect(buf.fullfilment).to.equal(10);
         });
@@ -36,7 +37,8 @@ describe('core/lzh/stackBuffer', () => {
             buf.add(data1, 0, data1.length);
             buf.add(data2, 0, data2.length);
 
-            const index = buf.intersect(Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
+            const check = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            const index = buf.intersect(check, check.length);
             expect(index).to.eql({ length: 10, position: 0 } as BufferIntersection);
             expect(buf.fullfilment).to.equal(10);
         });
@@ -45,13 +47,13 @@ describe('core/lzh/stackBuffer', () => {
     describe('intersect', () => {
         it('should return a negative result if buffer is empty', () => {
             const buf = new StackBuffer();
-            const index = buf.intersect(Buffer.allocUnsafe(0));
+            const index = buf.intersect(Buffer.allocUnsafe(0), 0);
             expect(index).to.eql({ length: 0, position: -1 } as BufferIntersection);
         });
 
         it('should return a negative result if stack is empty', () => {
             const buf = new StackBuffer();
-            const index = buf.intersect(Buffer.allocUnsafe(10));
+            const index = buf.intersect(Buffer.allocUnsafe(10), 10);
             expect(index).to.eql({ length: 0, position: -1 } as BufferIntersection);
         });
 
@@ -60,7 +62,8 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             buf.add(data, 0, data.length);
 
-            const index = buf.intersect(Buffer.from([3, 3, 3]));
+            const check = Buffer.from([3, 3, 3]);
+            const index = buf.intersect(check, check.length);
             expect(index).to.eql({ length: 0, position: -1 } as BufferIntersection);
         });
 
@@ -69,7 +72,8 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             buf.add(data, 0, data.length);
 
-            const index = buf.intersect(Buffer.from([1, 1, 2, 2, 2]));
+            const check = Buffer.from([1, 1, 2, 2, 2]);
+            const index = buf.intersect(check, check.length);
             expect(index).to.eql({ length: 5, position: 4 } as BufferIntersection);
         });
 
@@ -78,7 +82,8 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             buf.add(data, 0, data.length);
 
-            const index = buf.intersect(Buffer.from([2, 2, 3, 5, 1]));
+            const check = Buffer.from([2, 2, 3, 5, 1]);
+            const index = buf.intersect(check, check.length);
             expect(index).to.eql({ length: 3, position: 7 } as BufferIntersection);
         });
 
@@ -87,7 +92,8 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             buf.add(data, 0, data.length);
 
-            const index = buf.intersect(Buffer.from([2, 2, 3, 5, 1]));
+            const check = Buffer.from([2, 2, 3, 5, 1]);
+            const index = buf.intersect(check, check.length);
             expect(index).to.eql({ length: 3, position: 5 } as BufferIntersection);
         });
     });
@@ -95,19 +101,22 @@ describe('core/lzh/stackBuffer', () => {
     describe('checkWhitespace', () => {
         it('should return 0 if buffer starts from a non-whitespace', () => {
             const buf = new StackBuffer();
-            const count = buf.checkWhitespace(Buffer.from([0x10]));
+            const data = Buffer.from([0x10]);
+            const count = buf.checkWhitespace(data, data.length);
             expect(count).to.eql(0);
         });
 
-        it('should return a count of sequantial whitespaces', () => {
+        it('should return a count of sequential whitespaces', () => {
             const buf = new StackBuffer();
-            const count = buf.checkWhitespace(Buffer.from([0x20, 0x20, 0x20, 0x20, 0x20]));
+            const data = Buffer.from([0x20, 0x20, 0x20, 0x20, 0x20]);
+            const count = buf.checkWhitespace(data, data.length);
             expect(count).to.eql(5);
         });
 
         it('should return a count of sequantial whitespaces ending with a non-whitespace', () => {
             const buf = new StackBuffer();
-            const count = buf.checkWhitespace(Buffer.from([0x20, 0x20, 0x20, 0x20, 0x20, 0x00]));
+            const data = Buffer.from([0x20, 0x20, 0x20, 0x20, 0x20, 0x00]);
+            const count = buf.checkWhitespace(data, data.length);
             expect(count).to.eql(5);
         });
     });
@@ -117,7 +126,8 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             buf.add(Buffer.from([0x00, 0x01, 0x02, 0x03]), 0, 4);
 
-            const match = buf.checkSequence(Buffer.from([0x05, 0x06, 0x07]));
+            const data = Buffer.from([0x05, 0x06, 0x07]);
+            const match = buf.checkSequence(data, data.length);
 
             expect(match).to.eql({ sequenceBytes: 0, sourceBytes: 0 } as SequenceInspection);
         });
@@ -126,7 +136,8 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             buf.add(Buffer.from([0x00, 0x01, 0x02, 0x03]), 0, 4);
 
-            const match = buf.checkSequence(Buffer.from([0x02, 0x03, 0x04]));
+            const data = Buffer.from([0x02, 0x03, 0x04]);
+            const match = buf.checkSequence(data, data.length);
 
             expect(match).to.eql({ sequenceBytes: 2, sourceBytes: 2 } as SequenceInspection);
         });
@@ -135,7 +146,8 @@ describe('core/lzh/stackBuffer', () => {
             const buf = new StackBuffer();
             buf.add(Buffer.from([0x00, 0x01, 0x02, 0x03]), 0, 4);
 
-            const match = buf.checkSequence(Buffer.from([0x02, 0x03, 0x02, 0x03, 0x02, 0x03, 0x02]));
+            const data = Buffer.from([0x02, 0x03, 0x02, 0x03, 0x02, 0x03, 0x02]);
+            const match = buf.checkSequence(data, data.length);
 
             expect(match).to.eql({ sequenceBytes: 2, sourceBytes: 7 } as SequenceInspection);
         });
