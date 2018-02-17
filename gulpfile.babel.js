@@ -7,6 +7,7 @@ import cached from 'gulp-cached';
 import istanbul from 'gulp-istanbul'
 import coveralls from 'gulp-coveralls';
 import remapIstanbul from 'remap-istanbul/lib/gulpRemapIstanbul';
+import merge from 'merge-stream';
 import del from 'del';
 import path from 'path';
 
@@ -34,9 +35,11 @@ gulp.task('tslint', () => {
 const tsproject = tsc.createProject('tsconfig.json');
 
 gulp.task('assemble', ['clean', 'tslint'], () => {
-    return gulp.src(sourceFiles)
+    const source = gulp.src(sourceFiles)
         .pipe(sourcemaps.init())
-        .pipe(tsproject()).js
+        .pipe(tsproject())
+
+    return merge(source.js, source.dts)
         .pipe(sourcemaps.write('./', {
             includeContent: false,
             sourceRoot: '../src'

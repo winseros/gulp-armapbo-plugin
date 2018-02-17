@@ -16,7 +16,7 @@ const pbo = require('gulp-armapbo');
 
 gulp.task('pack', () => {
     return gulp.src('pbo-contents/**/*')
-        .pipe(pbo({
+        .pipe(pbo.pack({
             fileName: 'my-file.pbo',
             extensions: [{
                 name: 'author',
@@ -35,8 +35,34 @@ gulp.task('pack', () => {
 });
 ```
 
+## Usage with TypeScript
+```
+import * as gulp from 'gulp';
+import {pack, StreamOptions} from 'gulp-armapbo';
+
+gulp.task('pack', () => {
+    return gulp.src('pbo-contents/**/*')
+        .pipe(pack({
+            fileName: 'my-file.pbo',
+            extensions: [{
+                name: 'author',
+                value: 'Author Name'
+            }, {
+                name: 'mission',
+                value: 'Mission Name'
+            }],
+            compress: [
+                '**/*.sqf',
+                'mission.sqm',
+                'description.ext'
+            ]
+        } as StreamOptions))
+        .pipe(gulp.dest('pbo-packed/'));
+});
+```
+
 ## Plugin API
-pbo([options])
+pbo.pack([options])
 
 ### Options
 Required: `no`
