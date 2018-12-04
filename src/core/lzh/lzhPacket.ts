@@ -61,7 +61,7 @@ export class LzhPacket {
                 processed = sequence.sourceBytes;
             }
             dict.add(buffer, offset, processed);
-            this._length = this._data.writeInt16LE(pointer, this._length, true);
+            this._length = this._data.writeUInt16LE(pointer, this._length, true);
         } else {
             processed = this._composeUncompressed(chunk, buffer, offset, dict);
         }
