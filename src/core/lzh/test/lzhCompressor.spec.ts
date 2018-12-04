@@ -11,7 +11,7 @@ describe('core/lzh/lzhCompressor', () => {
     let sandbox: sinon.SinonSandbox;
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.createSandbox();
     });
 
     afterEach(() => {
@@ -20,9 +20,9 @@ describe('core/lzh/lzhCompressor', () => {
 
     describe('writeCompressed', () => {
         it('should compress the source buffer', () => {
-            const packet1 = { compose: sandbox.stub(), flush: sandbox.stub() };
-            const packet2 = { compose: sandbox.stub(), flush: sandbox.stub() };
-            const packet3 = { compose: sandbox.stub(), flush: sandbox.stub() };
+            const packet1 = { compose: sandbox.stub(), flush: sandbox.stub() } as any;
+            const packet2 = { compose: sandbox.stub(), flush: sandbox.stub() } as any;
+            const packet3 = { compose: sandbox.stub(), flush: sandbox.stub() } as any;
 
             packet1.compose.returns(5);
             packet2.compose.returns(11);
